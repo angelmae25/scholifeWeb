@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SchoLife — Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body>
+<div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">SchoLife</div>
+        <div class="nav-section">Main</div>
+        <a th:href="@{/dashboard/index}"         class="nav-item active"><span class="nav-icon">🏠</span> Dashboard</a>
+        <a th:href="@{/dashboard/activity}"      class="nav-item"><span class="nav-icon">📋</span> Activity <span class="nav-badge">12</span></a>
+        <div class="nav-section">Management</div>
+        <a th:href="@{/dashboard/students}"      class="nav-item"><span class="nav-icon">🎓</span> Student Management</a>
+        <a th:href="@{/dashboard/organizations}" class="nav-item"><span class="nav-icon">🏛️</span> Organization Management</a>
+        <a th:href="@{/dashboard/roles}"         class="nav-item"><span class="nav-icon">🔑</span> Role Assignment</a>
+        <div class="nav-section">Communication</div>
+        <a th:href="@{/dashboard/messages}"      class="nav-item"><span class="nav-icon">💬</span> Messages <span class="nav-badge">3</span></a>
+        <div class="nav-section">System</div>
+        <a th:href="@{/dashboard/admins}"        class="nav-item"><span class="nav-icon">⚙️</span> Admin Management</a>
+        <div class="sidebar-footer">
+            <a th:href="@{/logout}" class="nav-logout" onclick="return confirm('Are you sure you want to logout?')">
+                <span class="nav-icon">🚪</span> Log out
+            </a>
+        </div>
+    </aside>
+
+    <div class="main">
+        <!-- TOPBAR -->
+        <div class="topbar">
+            <div class="topbar-brand">SchoLife <small>Admin Portal</small></div>
+            <div class="topbar-search">
+                <span style="color:var(--text-light);">🔍</span>
+                <input type="text" placeholder="Search anything...">
+            </div>
+            <div class="topbar-right">
+                <div class="icon-btn">🔔</div>
+                <div class="icon-btn">⊞</div>
+                <div class="user-pill"><div class="user-avatar">SA</div><span>Super Admin</span></div>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Page Header -->
+            <div class="page-header fu d0">
+                <div class="ph-left">
+                    <h1>Dashboard</h1>
+                    <p>Welcome back, Super Admin. Here's your system overview.</p>
+                </div>
+                <div style="font-size:0.83rem;color:var(--text-light);">📅 Wednesday, March 18, 2026</div>
+            </div>
+
+            <!-- Stat Cards -->
+            <div class="stat-grid g4 fu d1">
+                <div class="stat-card">
+                    <div class="sc-blob" style="background:var(--crimson);"></div>
+                    <div class="sc-badge up">↑ 8.2%</div>
+                    <div class="sc-icon" style="background:var(--crimson-muted);">🎓</div>
+                    <div class="sc-value">1,248</div>
+                    <div class="sc-label">Total Students</div>
+                </div>
+                <div class="stat-card">
+                    <div class="sc-blob" style="background:var(--gold);"></div>
+                    <div class="sc-badge up">↑ 3.1%</div>
+                    <div class="sc-icon" style="background:var(--gold-light);">🏛️</div>
+                    <div class="sc-value">34</div>
+                    <div class="sc-label">Organizations</div>
+                </div>
+                <div class="stat-card">
+                    <div class="sc-blob" style="background:var(--green);"></div>
+                    <div class="sc-badge up">↑ 1.0%</div>
+                    <div class="sc-icon" style="background:var(--green-bg);">🔑</div>
+                    <div class="sc-value">12</div>
+                    <div class="sc-label">Active Roles</div>
+                </div>
+                <div class="stat-card">
+                    <div class="sc-blob" style="background:var(--blue);"></div>
+                    <div class="sc-badge down">↓ 0.5%</div>
+                    <div class="sc-icon" style="background:var(--blue-bg);">📊</div>
+                    <div class="sc-value">287</div>
+                    <div class="sc-label">Activities This Month</div>
+                </div>
+            </div>
+
+            <!-- Bottom grid -->
+            <div class="dash-grid fu d2">
+                <!-- Enrollment by College -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Enrollment by College</span>
+                        <a th:href="@{/dashboard/students}" class="btn btn-outline btn-sm">View All</a>
+                    </div>
+                    <div class="enroll-list">
+                        <div class="enroll-item">
+                            <div class="enroll-name">Engineering</div>
+                            <div class="enroll-track"><span class="enroll-fill" style="width:86%;background:var(--crimson);"></span></div>
+                            <div class="enroll-count">385</div>
+                        </div>
+                        <div class="enroll-item">
+                            <div class="enroll-name">Business</div>
+                            <div class="enroll-track"><span class="enroll-fill" style="width:69%;background:var(--crimson-light);"></span></div>
+                            <div class="enroll-count">308</div>
+                        </div>
+                        <div class="enroll-item">
+                            <div class="enroll-name">Education</div>
+                            <div class="enroll-track"><span class="enroll-fill" style="width:56%;background:var(--gold);"></span></div>
+                            <div class="enroll-count">249</div>
+                        </div>
+                        <div class="enroll-item">
+                            <div class="enroll-name">Arts &amp; Sciences</div>
+                            <div class="enroll-track"><span class="enroll-fill" style="width:44%;background:#b87209;"></span></div>
+                            <div class="enroll-count">198</div>
+                        </div>
+                        <div class="enroll-item">
+                            <div class="enroll-name">Nursing</div>
+                            <div class="enroll-track"><span class="enroll-fill" style="width:24%;background:var(--crimson-light);"></span></div>
+                            <div class="enroll-count">108</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Recent Activity</span>
+                        <a th:href="@{/dashboard/activity}" class="btn btn-outline btn-sm">View All</a>
+                    </div>
+                    <div class="recent-list">
+                        <div class="recent-item">
+                            <div class="rdot" style="background:var(--crimson);"></div>
+                            <div>
+                                <div class="rtext"><strong>Maria Santos</strong> was enrolled in BSIT program</div>
+                                <div class="rtime">2 minutes ago</div>
+                            </div>
+                        </div>
+                        <div class="recent-item">
+                            <div class="rdot" style="background:var(--gold);"></div>
+                            <div>
+                                <div class="rtext"><strong>JPCS Organization</strong> membership updated (+5)</div>
+                                <div class="rtime">18 minutes ago</div>
+                            </div>
+                        </div>
+                        <div class="recent-item">
+                            <div class="rdot" style="background:var(--blue);"></div>
+                            <div>
+                                <div class="rtext"><strong>Juan dela Cruz</strong> assigned as Treasurer</div>
+                                <div class="rtime">1 hour ago</div>
+                            </div>
+                        </div>
+                        <div class="recent-item">
+                            <div class="rdot" style="background:var(--green);"></div>
+                            <div>
+                                <div class="rtext"><strong>Admin login</strong> — admin@scholife.edu</div>
+                                <div class="rtime">2 hours ago</div>
+                            </div>
+                        </div>
+                        <div class="recent-item">
+                            <div class="rdot" style="background:var(--yellow);"></div>
+                            <div>
+                                <div class="rtext"><strong>Rico Lim</strong> status changed to Pending</div>
+                                <div class="rtime">3 hours ago</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- /content -->
+    </div><!-- /main -->
+</div><!-- /app -->
+</body>
+</html>

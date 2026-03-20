@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SchoLife — Activity</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body>
+<div class="app">
+
+    <aside class="sidebar">
+        <div class="sidebar-logo">SchoLife</div>
+        <div class="nav-section">Main</div>
+        <a th:href="@{/dashboard/index}"         class="nav-item"><span class="nav-icon">🏠</span> Dashboard</a>
+        <a th:href="@{/dashboard/activity}"      class="nav-item active"><span class="nav-icon">📋</span> Activity <span class="nav-badge">12</span></a>
+        <div class="nav-section">Management</div>
+        <a th:href="@{/dashboard/students}"      class="nav-item"><span class="nav-icon">🎓</span> Student Management</a>
+        <a th:href="@{/dashboard/organizations}" class="nav-item"><span class="nav-icon">🏛️</span> Organization Management</a>
+        <a th:href="@{/dashboard/roles}"         class="nav-item"><span class="nav-icon">🔑</span> Role Assignment</a>
+        <div class="nav-section">Communication</div>
+        <a th:href="@{/dashboard/messages}"      class="nav-item"><span class="nav-icon">💬</span> Messages <span class="nav-badge">3</span></a>
+        <div class="nav-section">System</div>
+        <a th:href="@{/dashboard/admins}"        class="nav-item"><span class="nav-icon">⚙️</span> Admin Management</a>
+        <div class="sidebar-footer">
+            <a th:href="@{/logout}" class="nav-logout" onclick="return confirm('Are you sure you want to logout?')">
+                <span class="nav-icon">🚪</span> Log out
+            </a>
+        </div>
+    </aside>
+
+    <div class="main">
+        <div class="topbar">
+            <div class="topbar-brand">SchoLife <small>Admin Portal</small></div>
+            <div class="topbar-search">
+                <span style="color:var(--text-light);">🔍</span>
+                <input type="text" placeholder="Search anything...">
+            </div>
+            <div class="topbar-right">
+                <div class="icon-btn">🔔</div>
+                <div class="icon-btn">⊞</div>
+                <div class="user-pill"><div class="user-avatar">SA</div><span>Super Admin</span></div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="page-header fu d0">
+                <div class="ph-left">
+                    <h1>Activity</h1>
+                    <p>Full system event log and audit trail.</p>
+                </div>
+                <button class="btn btn-outline">⬇ Export Log</button>
+            </div>
+
+            <div class="card fu d1">
+                <div class="card-header">
+                    <span class="card-title">System Activity Log</span>
+                    <span class="badge b-red">12 New</span>
+                </div>
+
+                <div class="activity-entry">
+                    <div class="act-icon" style="background:var(--crimson-muted);">🎓</div>
+                    <div class="act-body">
+                        <div class="act-text"><strong>Maria Santos</strong> was enrolled in <strong>BSIT</strong> program by Admin</div>
+                        <div class="act-time">March 18, 2026 · 10:42 AM</div>
+                    </div>
+                </div>
+                <div class="activity-entry">
+                    <div class="act-icon" style="background:var(--gold-light);">🏛️</div>
+                    <div class="act-body">
+                        <div class="act-text"><strong>JPCS Organization</strong> membership updated — 5 new members added</div>
+                        <div class="act-time">March 18, 2026 · 10:24 AM</div>
+                    </div>
+                </div>
+                <div class="activity-entry">
+                    <div class="act-icon" style="background:var(--blue-bg);">🔑</div>
+                    <div class="act-body">
+                        <div class="act-text"><strong>Juan dela Cruz</strong> assigned role of <strong>Treasurer</strong> in JPCS</div>
+                        <div class="act-time">March 18, 2026 · 09:48 AM</div>
+                    </div>
+                </div>
+                <div class="activity-entry">
+                    <div class="act-icon" style="background:var(--green-bg);">🔐</div>
+                    <div class="act-body">
+                        <div class="act-text"><strong>Admin login</strong> — admin@scholife.edu logged in successfully</div>
+                        <div class="act-time">March 18, 2026 · 08:30 AM</div>
+                    </div>
+                </div>
+                <div class="activity-entry">
+                    <div class="act-icon" style="background:var(--yellow-bg);">⚠️</div>
+                    <div class="act-body">
+                        <div class="act-text"><strong>Rico Lim</strong> status changed to <strong>Pending</strong> — awaiting document verification</div>
+                        <div class="act-time">March 18, 2026 · 07:55 AM</div>
+                    </div>
+                </div>
+                <div class="activity-entry">
+                    <div class="act-icon" style="background:var(--crimson-muted);">🗑️</div>
+                    <div class="act-body">
+                        <div class="act-text"><strong>Ana Reyes</strong> removed from <strong>Debate Club</strong> organization</div>
+                        <div class="act-time">March 17, 2026 · 04:10 PM</div>
+                    </div>
+                </div>
+                <div class="activity-entry">
+                    <div class="act-icon" style="background:var(--blue-bg);">📝</div>
+                    <div class="act-body">
+                        <div class="act-text">New organization <strong>Photography Guild</strong> created and activated</div>
+                        <div class="act-time">March 17, 2026 · 02:33 PM</div>
+                    </div>
+                </div>
+                <div class="activity-entry">
+                    <div class="act-icon" style="background:var(--green-bg);">✅</div>
+                    <div class="act-body">
+                        <div class="act-text"><strong>12 students</strong> from Engineering successfully migrated to new semester</div>
+                        <div class="act-time">March 17, 2026 · 11:00 AM</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

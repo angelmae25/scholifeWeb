@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SchoLife — Student Management</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body>
+<div class="app">
+
+    <aside class="sidebar">
+        <div class="sidebar-logo">SchoLife</div>
+        <div class="nav-section">Main</div>
+        <a th:href="@{/dashboard/index}"         class="nav-item"><span class="nav-icon">🏠</span> Dashboard</a>
+        <a th:href="@{/dashboard/activity}"      class="nav-item"><span class="nav-icon">📋</span> Activity <span class="nav-badge">12</span></a>
+        <div class="nav-section">Management</div>
+        <a th:href="@{/dashboard/students}"      class="nav-item active"><span class="nav-icon">🎓</span> Student Management</a>
+        <a th:href="@{/dashboard/organizations}" class="nav-item"><span class="nav-icon">🏛️</span> Organization Management</a>
+        <a th:href="@{/dashboard/roles}"         class="nav-item"><span class="nav-icon">🔑</span> Role Assignment</a>
+        <div class="nav-section">Communication</div>
+        <a th:href="@{/dashboard/messages}"      class="nav-item"><span class="nav-icon">💬</span> Messages <span class="nav-badge">3</span></a>
+        <div class="nav-section">System</div>
+        <a th:href="@{/dashboard/admins}"        class="nav-item"><span class="nav-icon">⚙️</span> Admin Management</a>
+        <div class="sidebar-footer">
+            <a th:href="@{/logout}" class="nav-logout" onclick="return confirm('Are you sure you want to logout?')">
+                <span class="nav-icon">🚪</span> Log out
+            </a>
+        </div>
+    </aside>
+
+    <div class="main">
+        <div class="topbar">
+            <div class="topbar-brand">SchoLife <small>Admin Portal</small></div>
+            <div class="topbar-search">
+                <span style="color:var(--text-light);">🔍</span>
+                <input type="text" placeholder="Search anything...">
+            </div>
+            <div class="topbar-right">
+                <div class="icon-btn">🔔</div>
+                <div class="icon-btn">⊞</div>
+                <div class="user-pill"><div class="user-avatar">SA</div><span>Super Admin</span></div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="page-header fu d0">
+                <div class="ph-left">
+                    <h1>Student Management</h1>
+                    <p>Manage enrolled students and their records.</p>
+                </div>
+                <button class="btn btn-primary">+ Add Student</button>
+            </div>
+
+            <div class="toolbar fu d1">
+                <div class="search-bar" style="flex:1;max-width:360px;">
+                    <span class="si">🔍</span>
+                    <input type="text" placeholder="Search by name or ID...">
+                </div>
+                <select class="inline-select">
+                    <option>All Colleges</option><option>Engineering</option><option>Business</option>
+                    <option>Education</option><option>Arts &amp; Sciences</option><option>Nursing</option>
+                </select>
+                <div class="filter-tabs">
+                    <div class="ftab active" onclick="setTab(this)">All</div>
+                    <div class="ftab" onclick="setTab(this)">Active</div>
+                    <div class="ftab" onclick="setTab(this)">Pending</div>
+                    <div class="ftab" onclick="setTab(this)">Inactive</div>
+                </div>
+            </div>
+
+            <div class="card fu d2">
+                <table class="data-table">
+                    <thead>
+                    <tr><th>Student ID</th><th>Name</th><th>College</th><th>Program</th><th>Year</th><th>Status</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr><td>2024-0001</td><td><div class="user-cell"><div class="av av-sm" style="background:var(--crimson);">MS</div><div><div class="uc-name">Maria Santos</div><div class="uc-sub">maria.santos@edu.ph</div></div></div></td><td>Engineering</td><td>BSIT</td><td>2nd</td><td><span class="status s-active">Active</span></td><td><div class="tbl-actions"><button class="btn btn-outline btn-sm">View</button><button class="btn btn-outline btn-sm">Edit</button></div></td></tr>
+                    <tr><td>2024-0002</td><td><div class="user-cell"><div class="av av-sm" style="background:var(--blue);">JC</div><div><div class="uc-name">Juan dela Cruz</div><div class="uc-sub">juan.delacruz@edu.ph</div></div></div></td><td>Business</td><td>BSBA</td><td>3rd</td><td><span class="status s-active">Active</span></td><td><div class="tbl-actions"><button class="btn btn-outline btn-sm">View</button><button class="btn btn-outline btn-sm">Edit</button></div></td></tr>
+                    <tr><td>2023-0049</td><td><div class="user-cell"><div class="av av-sm" style="background:var(--gold);">RL</div><div><div class="uc-name">Rico Lim</div><div class="uc-sub">rico.lim@edu.ph</div></div></div></td><td>Engineering</td><td>BSCE</td><td>4th</td><td><span class="status s-pending">Pending</span></td><td><div class="tbl-actions"><button class="btn btn-outline btn-sm">View</button><button class="btn btn-outline btn-sm">Edit</button></div></td></tr>
+                    <tr><td>2024-0015</td><td><div class="user-cell"><div class="av av-sm" style="background:var(--green);">AR</div><div><div class="uc-name">Ana Reyes</div><div class="uc-sub">ana.reyes@edu.ph</div></div></div></td><td>Nursing</td><td>BSN</td><td>1st</td><td><span class="status s-active">Active</span></td><td><div class="tbl-actions"><button class="btn btn-outline btn-sm">View</button><button class="btn btn-outline btn-sm">Edit</button></div></td></tr>
+                    <tr><td>2022-0077</td><td><div class="user-cell"><div class="av av-sm" style="background:#6B7280;">CM</div><div><div class="uc-name">Carlo Mendoza</div><div class="uc-sub">carlo.mendoza@edu.ph</div></div></div></td><td>Arts &amp; Sciences</td><td>BSPS</td><td>4th</td><td><span class="status s-inactive">Inactive</span></td><td><div class="tbl-actions"><button class="btn btn-outline btn-sm">View</button><button class="btn btn-outline btn-sm">Edit</button></div></td></tr>
+                    <tr><td>2024-0031</td><td><div class="user-cell"><div class="av av-sm" style="background:#8B5CF6;">LF</div><div><div class="uc-name">Liza Flores</div><div class="uc-sub">liza.flores@edu.ph</div></div></div></td><td>Education</td><td>BEED</td><td>2nd</td><td><span class="status s-active">Active</span></td><td><div class="tbl-actions"><button class="btn btn-outline btn-sm">View</button><button class="btn btn-outline btn-sm">Edit</button></div></td></tr>
+                    <tr><td>2023-0088</td><td><div class="user-cell"><div class="av av-sm" style="background:#EC4899;">MT</div><div><div class="uc-name">Mark Tan</div><div class="uc-sub">mark.tan@edu.ph</div></div></div></td><td>Business</td><td>BSAC</td><td>3rd</td><td><span class="status s-pending">Pending</span></td><td><div class="tbl-actions"><button class="btn btn-outline btn-sm">View</button><button class="btn btn-outline btn-sm">Edit</button></div></td></tr>
+                    <tr><td>2024-0042</td><td><div class="user-cell"><div class="av av-sm" style="background:#0891B2;">JR</div><div><div class="uc-name">Joy Ramos</div><div class="uc-sub">joy.ramos@edu.ph</div></div></div></td><td>Engineering</td><td>BSEE</td><td>1st</td><td><span class="status s-active">Active</span></td><td><div class="tbl-actions"><button class="btn btn-outline btn-sm">View</button><button class="btn btn-outline btn-sm">Edit</button></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function setTab(el) {
+        el.closest('.filter-tabs').querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SchoLife — Messages</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body>
+<div class="app">
+
+    <aside class="sidebar">
+        <div class="sidebar-logo">SchoLife</div>
+        <div class="nav-section">Main</div>
+        <a th:href="@{/dashboard/index}"         class="nav-item"><span class="nav-icon">🏠</span> Dashboard</a>
+        <a th:href="@{/dashboard/activity}"      class="nav-item"><span class="nav-icon">📋</span> Activity <span class="nav-badge">12</span></a>
+        <div class="nav-section">Management</div>
+        <a th:href="@{/dashboard/students}"      class="nav-item"><span class="nav-icon">🎓</span> Student Management</a>
+        <a th:href="@{/dashboard/organizations}" class="nav-item"><span class="nav-icon">🏛️</span> Organization Management</a>
+        <a th:href="@{/dashboard/roles}"         class="nav-item"><span class="nav-icon">🔑</span> Role Assignment</a>
+        <div class="nav-section">Communication</div>
+        <a th:href="@{/dashboard/messages}"      class="nav-item active"><span class="nav-icon">💬</span> Messages <span class="nav-badge">3</span></a>
+        <div class="nav-section">System</div>
+        <a th:href="@{/dashboard/admins}"        class="nav-item"><span class="nav-icon">⚙️</span> Admin Management</a>
+        <div class="sidebar-footer">
+            <a th:href="@{/logout}" class="nav-logout" onclick="return confirm('Are you sure you want to logout?')">
+                <span class="nav-icon">🚪</span> Log out
+            </a>
+        </div>
+    </aside>
+
+    <div class="main">
+        <div class="topbar">
+            <div class="topbar-brand">SchoLife <small>Admin Portal</small></div>
+            <div class="topbar-search">
+                <span style="color:var(--text-light);">🔍</span>
+                <input type="text" placeholder="Search anything...">
+            </div>
+            <div class="topbar-right">
+                <div class="icon-btn">🔔</div>
+                <div class="icon-btn">⊞</div>
+                <div class="user-pill"><div class="user-avatar">SA</div><span>Super Admin</span></div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="page-header fu d0">
+                <div class="ph-left">
+                    <h1>Messages</h1>
+                    <p>System communications and inbox.</p>
+                </div>
+                <button class="btn btn-primary">✏️ Compose</button>
+            </div>
+
+            <div class="card fu d1">
+                <div class="card-header">
+                    <span class="card-title">Inbox</span>
+                    <span class="badge b-red">3 Unread</span>
+                </div>
+
+                <!-- Unread messages -->
+                <div class="msg-item unread">
+                    <div class="msg-av" style="background:var(--crimson);">MS</div>
+                    <div class="msg-body">
+                        <div class="msg-name">Maria Santos</div>
+                        <div class="msg-preview">Hi Admin, I'd like to request a transfer of organization from JPCS to...</div>
+                    </div>
+                    <div class="msg-meta">
+                        <div class="msg-time">10:42 AM</div>
+                        <div class="msg-dot"></div>
+                    </div>
+                </div>
+                <div class="msg-item unread">
+                    <div class="msg-av" style="background:var(--gold);">JP</div>
+                    <div class="msg-body">
+                        <div class="msg-name">JPCS Adviser</div>
+                        <div class="msg-preview">Please review the updated membership list we submitted last Friday for...</div>
+                    </div>
+                    <div class="msg-meta">
+                        <div class="msg-time">9:15 AM</div>
+                        <div class="msg-dot"></div>
+                    </div>
+                </div>
+                <div class="msg-item unread">
+                    <div class="msg-av" style="background:var(--blue);">JC</div>
+                    <div class="msg-body">
+                        <div class="msg-name">Juan dela Cruz</div>
+                        <div class="msg-preview">Good morning! I have a concern about my role assignment. Can we schedule...</div>
+                    </div>
+                    <div class="msg-meta">
+                        <div class="msg-time">8:03 AM</div>
+                        <div class="msg-dot"></div>
+                    </div>
+                </div>
+
+                <!-- Read messages -->
+                <div class="msg-item">
+                    <div class="msg-av" style="background:var(--green);">AR</div>
+                    <div class="msg-body">
+                        <div class="msg-name">Ana Reyes</div>
+                        <div class="msg-preview">Thank you for processing my enrollment request. Looking forward to...</div>
+                    </div>
+                    <div class="msg-meta">
+                        <div class="msg-time">Yesterday</div>
+                    </div>
+                </div>
+                <div class="msg-item">
+                    <div class="msg-av" style="background:#8B5CF6;">RL</div>
+                    <div class="msg-body">
+                        <div class="msg-name">Rico Lim</div>
+                        <div class="msg-preview">I've submitted the required documents for verification. Please let me know...</div>
+                    </div>
+                    <div class="msg-meta">
+                        <div class="msg-time">Yesterday</div>
+                    </div>
+                </div>
+                <div class="msg-item">
+                    <div class="msg-av" style="background:#EC4899;">LF</div>
+                    <div class="msg-body">
+                        <div class="msg-name">Liza Flores</div>
+                        <div class="msg-preview">Attached is the signed constitution for the newly formed study group...</div>
+                    </div>
+                    <div class="msg-meta">
+                        <div class="msg-time">Mar 17</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

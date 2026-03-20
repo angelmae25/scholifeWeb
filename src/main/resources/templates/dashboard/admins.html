@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SchoLife — Admin Management</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body>
+<div class="app">
+
+    <aside class="sidebar">
+        <div class="sidebar-logo">SchoLife</div>
+        <div class="nav-section">Main</div>
+        <a th:href="@{/dashboard/index}"         class="nav-item"><span class="nav-icon">🏠</span> Dashboard</a>
+        <a th:href="@{/dashboard/activity}"      class="nav-item"><span class="nav-icon">📋</span> Activity <span class="nav-badge">12</span></a>
+        <div class="nav-section">Management</div>
+        <a th:href="@{/dashboard/students}"      class="nav-item"><span class="nav-icon">🎓</span> Student Management</a>
+        <a th:href="@{/dashboard/organizations}" class="nav-item"><span class="nav-icon">🏛️</span> Organization Management</a>
+        <a th:href="@{/dashboard/roles}"         class="nav-item"><span class="nav-icon">🔑</span> Role Assignment</a>
+        <div class="nav-section">Communication</div>
+        <a th:href="@{/dashboard/messages}"      class="nav-item"><span class="nav-icon">💬</span> Messages <span class="nav-badge">3</span></a>
+        <div class="nav-section">System</div>
+        <a th:href="@{/dashboard/admins}"        class="nav-item active"><span class="nav-icon">⚙️</span> Admin Management</a>
+        <div class="sidebar-footer">
+            <a th:href="@{/logout}" class="nav-logout" onclick="return confirm('Are you sure you want to logout?')">
+                <span class="nav-icon">🚪</span> Log out
+            </a>
+        </div>
+    </aside>
+
+    <div class="main">
+        <div class="topbar">
+            <div class="topbar-brand">SchoLife <small>Admin Portal</small></div>
+            <div class="topbar-search">
+                <span style="color:var(--text-light);">🔍</span>
+                <input type="text" placeholder="Search anything...">
+            </div>
+            <div class="topbar-right">
+                <div class="icon-btn">🔔</div>
+                <div class="icon-btn">⊞</div>
+                <div class="user-pill"><div class="user-avatar">SA</div><span>Super Admin</span></div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="page-header fu d0">
+                <div class="ph-left">
+                    <h1>Admin Management</h1>
+                    <p>Manage system administrators and access levels.</p>
+                </div>
+                <button class="btn btn-primary">+ Add Admin</button>
+            </div>
+
+            <div class="card fu d1">
+                <table class="data-table">
+                    <thead>
+                    <tr><th>Name</th><th>Email</th><th>Role</th><th>Last Login</th><th>Status</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td><div class="user-cell"><div class="av av-sm" style="background:var(--crimson);">SA</div><div><div class="uc-name">Super Admin</div><div class="uc-sub">Full system access</div></div></div></td>
+                        <td>admin@scholife.edu</td>
+                        <td><span class="badge b-crimson">Super Admin</span></td>
+                        <td>Today, 8:30 AM</td>
+                        <td><span class="status s-active">Active</span></td>
+                        <td><div class="tbl-actions"><button class="btn btn-outline btn-sm">Edit</button></div></td>
+                    </tr>
+                    <tr>
+                        <td><div class="user-cell"><div class="av av-sm" style="background:var(--blue);">RA</div><div><div class="uc-name">Registrar Admin</div><div class="uc-sub">Student records access</div></div></div></td>
+                        <td>registrar@scholife.edu</td>
+                        <td><span class="badge b-blue">Registrar</span></td>
+                        <td>Today, 9:00 AM</td>
+                        <td><span class="status s-active">Active</span></td>
+                        <td><div class="tbl-actions"><button class="btn btn-outline btn-sm">Edit</button><button class="btn btn-outline btn-sm">Suspend</button></div></td>
+                    </tr>
+                    <tr>
+                        <td><div class="user-cell"><div class="av av-sm" style="background:var(--gold);">OA</div><div><div class="uc-name">OSA Admin</div><div class="uc-sub">Organization affairs</div></div></div></td>
+                        <td>osa@scholife.edu</td>
+                        <td><span class="badge b-gold">OSA Staff</span></td>
+                        <td>Mar 17, 3:12 PM</td>
+                        <td><span class="status s-active">Active</span></td>
+                        <td><div class="tbl-actions"><button class="btn btn-outline btn-sm">Edit</button><button class="btn btn-outline btn-sm">Suspend</button></div></td>
+                    </tr>
+                    <tr>
+                        <td><div class="user-cell"><div class="av av-sm" style="background:var(--green);">FA</div><div><div class="uc-name">Finance Admin</div><div class="uc-sub">Financial records access</div></div></div></td>
+                        <td>finance@scholife.edu</td>
+                        <td><span class="badge b-green">Finance</span></td>
+                        <td>Mar 16, 11:45 AM</td>
+                        <td><span class="status s-inactive">Inactive</span></td>
+                        <td><div class="tbl-actions"><button class="btn btn-outline btn-sm">Edit</button><button class="btn btn-outline btn-sm">Activate</button></div></td>
+                    </tr>
+                    <tr>
+                        <td><div class="user-cell"><div class="av av-sm" style="background:#6B7280;">IT</div><div><div class="uc-name">IT Admin</div><div class="uc-sub">System configuration</div></div></div></td>
+                        <td>it@scholife.edu</td>
+                        <td><span class="badge b-gray">IT Staff</span></td>
+                        <td>Mar 15, 2:00 PM</td>
+                        <td><span class="status s-active">Active</span></td>
+                        <td><div class="tbl-actions"><button class="btn btn-outline btn-sm">Edit</button><button class="btn btn-outline btn-sm">Suspend</button></div></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

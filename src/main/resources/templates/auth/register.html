@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SchoLife — Create Account</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --crimson: #7B1C35; --crimson-dark: #5C1427; --crimson-light: #9B2D46;
+            --gold: #C9930A; --green: #16a34a; --red: #dc2626;
+            --text-dark: #111827; --text-mid: #4B5563; --text-light: #9CA3AF;
+            --border: #E5E7EB;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+        body { display: flex; }
+
+        .left {
+            width: 48%;
+            background: linear-gradient(150deg, #3a0b18 0%, #7B1C35 45%, #9B2D46 75%, #4a0f20 100%);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 3.5rem 3rem;
+            position: relative; overflow: hidden;
+        }
+        .left::before {
+            content: ''; position: absolute; inset: 0;
+            background-image: radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px);
+            background-size: 32px 32px; pointer-events: none;
+        }
+        .orb { position: absolute; border-radius: 50%; filter: blur(70px); pointer-events: none; }
+        .orb-1 { width: 260px; height: 260px; background: rgba(201,147,10,0.18); top: -60px; left: -60px; }
+        .orb-2 { width: 200px; height: 200px; background: rgba(155,45,70,0.3); bottom: 40px; right: -40px; }
+        .left-content { position: relative; z-index: 1; width: 100%; max-width: 400px; text-align: center; }
+        .brand { font-size: 2.8rem; font-weight: 800; color: white; letter-spacing: -1px; margin-bottom: 1.8rem; }
+        .brand span { color: var(--gold); }
+        .headline { font-family: 'Lora', serif; font-size: 2rem; font-weight: 700; color: white; line-height: 1.25; margin-bottom: 0.9rem; }
+        .headline em { color: var(--gold); font-style: normal; }
+        .tagline { color: rgba(255,255,255,0.6); font-size: 0.93rem; line-height: 1.65; margin-bottom: 2.5rem; max-width: 340px; margin-left: auto; margin-right: auto; }
+        .features { display: flex; flex-direction: column; gap: 0.85rem; text-align: left; }
+        .feature-item { display: flex; align-items: center; gap: 0.85rem; color: rgba(255,255,255,0.72); font-size: 0.87rem; }
+        .feat-icon { width: 30px; height: 30px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.82rem; flex-shrink: 0; color: var(--gold); }
+
+        .right { flex: 1; background: white; display: flex; flex-direction: column; justify-content: center; padding: 2.5rem 4.5rem; overflow-y: auto; }
+        .back-link { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: var(--text-light); text-decoration: none; margin-bottom: 1.5rem; transition: color 0.15s; }
+        .back-link:hover { color: var(--crimson); }
+        .form-header { margin-bottom: 1.8rem; }
+        .form-header h1 { font-size: 1.9rem; font-weight: 800; color: var(--text-dark); letter-spacing: -0.4px; margin-bottom: 0.35rem; }
+        .form-header p { font-size: 0.88rem; color: var(--text-light); }
+        .form-header a { color: var(--crimson); font-weight: 600; text-decoration: none; }
+
+        .alert-error { background: #fef2f2; border: 1.5px solid #fecaca; border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 1.2rem; color: #dc2626; font-size: 0.87rem; }
+        .alert-success { background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 1.2rem; color: #16a34a; font-size: 0.87rem; }
+
+        .form-row { display: flex; gap: 1rem; }
+        .form-row .form-group { flex: 1; }
+        .form-group { margin-bottom: 1.1rem; }
+        .form-label { display: block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-mid); margin-bottom: 0.42rem; }
+        .input-wrap { position: relative; }
+        .input-icon { position: absolute; left: 0.9rem; top: 50%; transform: translateY(-50%); color: var(--text-light); font-size: 0.85rem; pointer-events: none; }
+        .form-input { width: 100%; padding: 0.75rem 1rem 0.75rem 2.5rem; border: 1.5px solid var(--border); border-radius: 11px; font-size: 0.9rem; font-family: inherit; background: #F9FAFB; color: var(--text-dark); outline: none; transition: border-color 0.18s, box-shadow 0.18s; }
+        .form-input:focus { border-color: var(--crimson); box-shadow: 0 0 0 3.5px rgba(123,28,53,0.09); background: white; }
+        .form-input::placeholder { color: var(--text-light); }
+        .input-eye { position: absolute; right: 0.9rem; top: 50%; transform: translateY(-50%); color: var(--text-light); cursor: pointer; font-size: 0.9rem; }
+
+        .strength-bars { display: flex; gap: 4px; margin-top: 0.45rem; }
+        .sbar { flex: 1; height: 3px; border-radius: 2px; background: var(--border); transition: background 0.3s; }
+        .sbar.weak { background: var(--red); }
+        .sbar.fair { background: #f59e0b; }
+        .sbar.good { background: #84cc16; }
+        .sbar.strong { background: var(--green); }
+        .strength-label { font-size: 0.75rem; margin-top: 0.25rem; }
+        .strength-label.strong { color: var(--green); }
+        .strength-label.good { color: #65a30d; }
+        .strength-label.fair { color: #d97706; }
+        .strength-label.weak { color: var(--red); }
+
+        .terms-row { display: flex; align-items: center; gap: 0.6rem; margin: 0.8rem 0 1.2rem; font-size: 0.87rem; color: var(--text-mid); }
+        .terms-row input { accent-color: var(--crimson); width: 15px; height: 15px; cursor: pointer; flex-shrink: 0; }
+        .terms-row a { color: var(--crimson); font-weight: 600; text-decoration: none; }
+
+        .btn-create { width: 100%; padding: 0.88rem; background: var(--crimson); color: white; border: none; border-radius: 11px; font-size: 0.97rem; font-weight: 700; font-family: inherit; cursor: pointer; transition: background 0.18s, box-shadow 0.18s; box-shadow: 0 4px 18px rgba(123,28,53,0.25); display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        .btn-create:hover { background: var(--crimson-dark); }
+
+        @keyframes fadeIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: none; } }
+        .anim { animation: fadeIn 0.35s ease both; }
+        .d1 { animation-delay: 0.05s; } .d2 { animation-delay: 0.1s; }
+        .d3 { animation-delay: 0.15s; } .d4 { animation-delay: 0.2s; }
+    </style>
+</head>
+<body>
+
+<div class="left">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="left-content">
+        <div class="brand">Scho<span>Life</span></div>
+        <div class="headline">Empowering <em>Student Life</em> Management</div>
+        <p class="tagline">A unified platform for managing students, organizations, roles, and campus activities — all in one place.</p>
+        <div class="features">
+            <div class="feature-item"><div class="feat-icon">📋</div> Complete student records &amp; enrollment tracking</div>
+            <div class="feature-item"><div class="feat-icon">🏛️</div> Organization management &amp; membership control</div>
+            <div class="feature-item"><div class="feat-icon">🔐</div> Role-based access &amp; permissions system</div>
+            <div class="feature-item"><div class="feat-icon">📊</div> Real-time activity logs &amp; audit trail</div>
+        </div>
+    </div>
+</div>
+
+<div class="right">
+    <a th:href="@{/auth/login}" class="back-link anim">← Back to login</a>
+
+    <div class="form-header anim d1">
+        <h1>Create account</h1>
+        <p>Set up your SchoLife admin account. <a th:href="@{/auth/login}">Already have one? Sign in</a></p>
+    </div>
+
+    <!-- ERROR MESSAGE -->
+    <div class="alert-error" th:if="${error}" th:text="${error}"></div>
+
+    <!-- SUCCESS MESSAGE -->
+    <div class="alert-success" th:if="${param.registered}">
+        ✅ Account created! You can now sign in.
+    </div>
+
+    <!-- ★ FORM — saves to admins table via AdminService -->
+    <form th:action="@{/auth/register}" th:object="${admin}" method="post">
+
+        <!-- CSRF token -->
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+        <div class="form-row anim d1">
+            <div class="form-group">
+                <label class="form-label">First Name</label>
+                <div class="input-wrap">
+                    <span class="input-icon">👤</span>
+                    <!-- th:field binds to Admin.firstName -->
+                    <input class="form-input" type="text"
+                           th:field="*{firstName}"
+                           placeholder="First name"
+                           style="text-transform:uppercase;">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Last Name</label>
+                <div class="input-wrap">
+                    <span class="input-icon">👤</span>
+                    <!-- th:field binds to Admin.lastName -->
+                    <input class="form-input" type="text"
+                           th:field="*{lastName}"
+                           placeholder="Last name"
+                           style="text-transform:uppercase;">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group anim d2">
+            <label class="form-label">Email Address</label>
+            <div class="input-wrap">
+                <span class="input-icon">✉️</span>
+                <!-- th:field binds to Admin.email -->
+                <input class="form-input" type="email"
+                       th:field="*{email}"
+                       placeholder="yourname@school.edu.ph">
+            </div>
+        </div>
+
+        <div class="form-group anim d2">
+            <label class="form-label">Password</label>
+            <div class="input-wrap">
+                <span class="input-icon">🔒</span>
+                <!-- th:field binds to Admin.password -->
+                <input class="form-input" type="password"
+                       th:field="*{password}"
+                       id="pwInput"
+                       placeholder="Create a strong password"
+                       oninput="checkStrength(this.value)">
+                <span class="input-eye" onclick="togglePw('pwInput')">👁️</span>
+            </div>
+            <div class="strength-bars">
+                <div class="sbar" id="sb1"></div>
+                <div class="sbar" id="sb2"></div>
+                <div class="sbar" id="sb3"></div>
+                <div class="sbar" id="sb4"></div>
+            </div>
+            <div class="strength-label" id="slabel"></div>
+        </div>
+
+        <div class="form-group anim d3">
+            <label class="form-label">Confirm Password</label>
+            <div class="input-wrap">
+                <span class="input-icon">🔒</span>
+                <!-- NOT bound to model — only for frontend validation -->
+                <input class="form-input" type="password"
+                       id="pw2Input"
+                       placeholder="Repeat your password">
+                <span class="input-eye" onclick="togglePw('pw2Input')">👁️</span>
+            </div>
+        </div>
+
+        <div class="terms-row anim d3">
+            <input type="checkbox" id="termsCheck" required>
+            <label for="termsCheck">
+                I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+            </label>
+        </div>
+
+        <button type="submit" class="btn-create anim d4">
+            ✅ Create Account
+        </button>
+
+    </form>
+</div>
+
+<script>
+    function togglePw(id) {
+        const f = document.getElementById(id);
+        f.type = f.type === 'password' ? 'text' : 'password';
+    }
+
+    function checkStrength(val) {
+        const bars  = ['sb1','sb2','sb3','sb4'].map(id => document.getElementById(id));
+        const label = document.getElementById('slabel');
+        bars.forEach(b => { b.className = 'sbar'; });
+        if (!val) { label.textContent = ''; return; }
+        let score = 0;
+        if (val.length >= 8)          score++;
+        if (/[A-Z]/.test(val))        score++;
+        if (/[0-9]/.test(val))        score++;
+        if (/[^A-Za-z0-9]/.test(val)) score++;
+        const cls    = ['weak','fair','good','strong'][score - 1] || 'weak';
+        const labels = ['Weak','Fair','Good','Strong'];
+        for (let i = 0; i < score; i++) bars[i].classList.add(cls);
+        label.textContent  = labels[score - 1] || '';
+        label.className    = 'strength-label ' + cls;
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SchoLife — Role Assignment</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body>
+<div class="app">
+
+    <aside class="sidebar">
+        <div class="sidebar-logo">SchoLife</div>
+        <div class="nav-section">Main</div>
+        <a th:href="@{/dashboard/index}"         class="nav-item"><span class="nav-icon">🏠</span> Dashboard</a>
+        <a th:href="@{/dashboard/activity}"      class="nav-item"><span class="nav-icon">📋</span> Activity <span class="nav-badge">12</span></a>
+        <div class="nav-section">Management</div>
+        <a th:href="@{/dashboard/students}"      class="nav-item"><span class="nav-icon">🎓</span> Student Management</a>
+        <a th:href="@{/dashboard/organizations}" class="nav-item"><span class="nav-icon">🏛️</span> Organization Management</a>
+        <a th:href="@{/dashboard/roles}"         class="nav-item active"><span class="nav-icon">🔑</span> Role Assignment</a>
+        <div class="nav-section">Communication</div>
+        <a th:href="@{/dashboard/messages}"      class="nav-item"><span class="nav-icon">💬</span> Messages <span class="nav-badge">3</span></a>
+        <div class="nav-section">System</div>
+        <a th:href="@{/dashboard/admins}"        class="nav-item"><span class="nav-icon">⚙️</span> Admin Management</a>
+        <div class="sidebar-footer">
+            <a th:href="@{/logout}" class="nav-logout" onclick="return confirm('Are you sure you want to logout?')">
+                <span class="nav-icon">🚪</span> Log out
+            </a>
+        </div>
+    </aside>
+
+    <div class="main">
+        <div class="topbar">
+            <div class="topbar-brand">SchoLife <small>Admin Portal</small></div>
+            <div class="topbar-search">
+                <span style="color:var(--text-light);">🔍</span>
+                <input type="text" placeholder="Search anything...">
+            </div>
+            <div class="topbar-right">
+                <div class="icon-btn">🔔</div>
+                <div class="icon-btn">⊞</div>
+                <div class="user-pill"><div class="user-avatar">SA</div><span>Super Admin</span></div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="page-header fu d0">
+                <div class="ph-left">
+                    <h1>Role Assignment</h1>
+                    <p>Manage and assign organizational roles to students.</p>
+                </div>
+                <button class="btn btn-primary">+ Create Role</button>
+            </div>
+
+            <!-- Recent Assignments -->
+            <div class="card fu d1" style="margin-bottom:1.2rem;">
+                <div class="card-header"><span class="card-title">Recent Assignments</span></div>
+                <table class="data-table">
+                    <thead>
+                    <tr><th>Student</th><th>Role</th><th>Organization</th><th>Assigned By</th><th>Date</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td><div class="user-cell"><div class="av av-sm" style="background:var(--blue);">JC</div><div class="uc-name">Juan dela Cruz</div></div></td>
+                        <td><span class="badge b-blue">Treasurer</span></td>
+                        <td>JPCS</td><td>Super Admin</td><td>Mar 18, 2026</td>
+                        <td><button class="btn btn-outline btn-sm">Revoke</button></td>
+                    </tr>
+                    <tr>
+                        <td><div class="user-cell"><div class="av av-sm" style="background:var(--crimson);">MS</div><div class="uc-name">Maria Santos</div></div></td>
+                        <td><span class="badge b-crimson">President</span></td>
+                        <td>Engineering Society</td><td>Super Admin</td><td>Mar 15, 2026</td>
+                        <td><button class="btn btn-outline btn-sm">Revoke</button></td>
+                    </tr>
+                    <tr>
+                        <td><div class="user-cell"><div class="av av-sm" style="background:var(--green);">AR</div><div class="uc-name">Ana Reyes</div></div></td>
+                        <td><span class="badge b-gold">Secretary</span></td>
+                        <td>Red Cross Youth</td><td>Super Admin</td><td>Mar 12, 2026</td>
+                        <td><button class="btn btn-outline btn-sm">Revoke</button></td>
+                    </tr>
+                    <tr>
+                        <td><div class="user-cell"><div class="av av-sm" style="background:#8B5CF6;">LF</div><div class="uc-name">Liza Flores</div></div></td>
+                        <td><span class="badge b-green">Vice President</span></td>
+                        <td>Debate Club</td><td>Super Admin</td><td>Mar 10, 2026</td>
+                        <td><button class="btn btn-outline btn-sm">Revoke</button></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Available Roles -->
+            <div class="card fu d2">
+                <div class="card-header"><span class="card-title">Available Roles</span></div>
+                <div class="role-grid">
+                    <div class="role-card">
+                        <div class="role-card-title">🏆 President</div>
+                        <div class="role-card-count">12 assigned · 22 orgs</div>
+                        <div class="role-card-perms">
+                            <span class="perm-tag">Full Access</span>
+                            <span class="perm-tag">Sign Documents</span>
+                            <span class="perm-tag">Manage Members</span>
+                        </div>
+                    </div>
+                    <div class="role-card">
+                        <div class="role-card-title">📋 Vice President</div>
+                        <div class="role-card-count">12 assigned · 22 orgs</div>
+                        <div class="role-card-perms">
+                            <span class="perm-tag">Full Access</span>
+                            <span class="perm-tag">Manage Members</span>
+                        </div>
+                    </div>
+                    <div class="role-card">
+                        <div class="role-card-title">💰 Treasurer</div>
+                        <div class="role-card-count">18 assigned · 22 orgs</div>
+                        <div class="role-card-perms">
+                            <span class="perm-tag">View Finance</span>
+                            <span class="perm-tag">Submit Reports</span>
+                        </div>
+                    </div>
+                    <div class="role-card">
+                        <div class="role-card-title">📝 Secretary</div>
+                        <div class="role-card-count">15 assigned · 22 orgs</div>
+                        <div class="role-card-perms">
+                            <span class="perm-tag">Record Minutes</span>
+                            <span class="perm-tag">Send Notices</span>
+                        </div>
+                    </div>
+                    <div class="role-card">
+                        <div class="role-card-title">👤 Member</div>
+                        <div class="role-card-count">520 assigned · 34 orgs</div>
+                        <div class="role-card-perms">
+                            <span class="perm-tag">View Only</span>
+                            <span class="perm-tag">Attend Events</span>
+                        </div>
+                    </div>
+                    <div class="role-card">
+                        <div class="role-card-title">🎯 Officer</div>
+                        <div class="role-card-count">64 assigned · 30 orgs</div>
+                        <div class="role-card-perms">
+                            <span class="perm-tag">Manage Events</span>
+                            <span class="perm-tag">View Reports</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

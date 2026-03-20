@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SchoLife — Organization Management</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body>
+<div class="app">
+
+    <aside class="sidebar">
+        <div class="sidebar-logo">SchoLife</div>
+        <div class="nav-section">Main</div>
+        <a th:href="@{/dashboard/index}"         class="nav-item"><span class="nav-icon">🏠</span> Dashboard</a>
+        <a th:href="@{/dashboard/activity}"      class="nav-item"><span class="nav-icon">📋</span> Activity <span class="nav-badge">12</span></a>
+        <div class="nav-section">Management</div>
+        <a th:href="@{/dashboard/students}"      class="nav-item"><span class="nav-icon">🎓</span> Student Management</a>
+        <a th:href="@{/dashboard/organizations}" class="nav-item active"><span class="nav-icon">🏛️</span> Organization Management</a>
+        <a th:href="@{/dashboard/roles}"         class="nav-item"><span class="nav-icon">🔑</span> Role Assignment</a>
+        <div class="nav-section">Communication</div>
+        <a th:href="@{/dashboard/messages}"      class="nav-item"><span class="nav-icon">💬</span> Messages <span class="nav-badge">3</span></a>
+        <div class="nav-section">System</div>
+        <a th:href="@{/dashboard/admins}"        class="nav-item"><span class="nav-icon">⚙️</span> Admin Management</a>
+        <div class="sidebar-footer">
+            <a th:href="@{/logout}" class="nav-logout" onclick="return confirm('Are you sure you want to logout?')">
+                <span class="nav-icon">🚪</span> Log out
+            </a>
+        </div>
+    </aside>
+
+    <div class="main">
+        <div class="topbar">
+            <div class="topbar-brand">SchoLife <small>Admin Portal</small></div>
+            <div class="topbar-search">
+                <span style="color:var(--text-light);">🔍</span>
+                <input type="text" placeholder="Search anything...">
+            </div>
+            <div class="topbar-right">
+                <div class="icon-btn">🔔</div>
+                <div class="icon-btn">⊞</div>
+                <div class="user-pill"><div class="user-avatar">SA</div><span>Super Admin</span></div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="page-header fu d0">
+                <div class="ph-left">
+                    <h1>Organization Management</h1>
+                    <p>Manage student organizations and memberships.</p>
+                </div>
+                <button class="btn btn-primary">+ New Organization</button>
+            </div>
+
+            <div class="toolbar fu d1">
+                <div class="search-bar" style="flex:1;max-width:360px;">
+                    <span class="si">🔍</span>
+                    <input type="text" placeholder="Search organizations...">
+                </div>
+                <select class="inline-select">
+                    <option>All Types</option><option>Academic</option><option>Cultural</option><option>Sports</option><option>Service</option>
+                </select>
+                <div class="filter-tabs">
+                    <div class="ftab active" onclick="setTab(this)">All</div>
+                    <div class="ftab" onclick="setTab(this)">Active</div>
+                    <div class="ftab" onclick="setTab(this)">Pending</div>
+                </div>
+            </div>
+
+            <div class="card fu d2">
+                <table class="data-table">
+                    <thead>
+                    <tr><th>Org ID</th><th>Organization</th><th>Type</th><th>Members</th><th>Adviser</th><th>Status</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr><td>ORG-001</td><td><div class="user-cell"><div class="av av-sm" style="background:var(--crimson);">JP</div><div><div class="uc-name">JPCS</div><div class="uc-sub">Junior Phil. Computer Society</div></div></div></td><td><span class="badge b-blue">Academic</span></td><td><strong>128</strong></td><td>Prof. Santos</td><td><span class="status s-active">Active</span></td><td><div class="tbl-actions"><button class="btn btn-outline btn-sm">View</button><button class="btn btn-outline btn-sm">Edit</button></div></td></tr>
+                    <tr><td>ORG-002</td><td><div class="user-cell"><div class="av av-sm" style="background:var(--blue);">DC</div><div><div class="uc-name">Debate Club</div><div class="uc-sub">Academic Organization</div></div></div></td><td><span class="badge b-blue">Academic</span></td><td><strong>42</strong></td><td>Prof. dela Rosa</td><td><span class="status s-active">Active</span></td><td><div class="tbl-actions"><button class="btn btn-outline btn-sm">View</button><button class="btn btn-outline btn-sm">Edit</button></div></td></tr>
+                    <tr><td>ORG-003</td><td><div class="user-cell"><div class="av av-sm" style="background:#8B5CF6;">PG</div><div><div class="uc-name">Photography Guild</div><div class="uc-sub">Cultural Organization</div></div></div></td><td><span class="badge b-gold">Cultural</span></td><td><strong>31</strong></td><td>Prof. Lim</td><td><span class="status s-active">Active</span></td><td><div class="tbl-actions"><button class="btn btn-outline btn-sm">View</button><button class="btn btn-outline btn-sm">Edit</button></div></td></tr>
+                    <tr><td>ORG-004</td><td><div class="user-cell"><div class="av av-sm" style="background:var(--red);">RC</div><div><div class="uc-name">Red Cross Youth</div><div class="uc-sub">Service Organization</div></div></div></td><td><span class="badge b-green">Service</span></td><td><strong>87</strong></td><td>Dr. Reyes</td><td><span class="status s-active">Active</span></td><td><div class="tbl-actions"><button class="btn btn-outline btn-sm">View</button><button class="btn btn-outline btn-sm">Edit</button></div></td></tr>
+                    <tr><td>ORG-005</td><td><div class="user-cell"><div class="av av-sm" style="background:var(--green);">BV</div><div><div class="uc-name">Basketball Varsity</div><div class="uc-sub">Sports Organization</div></div></div></td><td><span class="badge b-gray">Sports</span></td><td><strong>22</strong></td><td>Coach Bautista</td><td><span class="status s-pending">Pending</span></td><td><div class="tbl-actions"><button class="btn btn-outline btn-sm">View</button><button class="btn btn-outline btn-sm">Edit</button></div></td></tr>
+                    <tr><td>ORG-006</td><td><div class="user-cell"><div class="av av-sm" style="background:var(--gold);">ES</div><div><div class="uc-name">Engineering Society</div><div class="uc-sub">Academic Organization</div></div></div></td><td><span class="badge b-blue">Academic</span></td><td><strong>210</strong></td><td>Prof. Cruz</td><td><span class="status s-active">Active</span></td><td><div class="tbl-actions"><button class="btn btn-outline btn-sm">View</button><button class="btn btn-outline btn-sm">Edit</button></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function setTab(el) {
+        el.closest('.filter-tabs').querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+    }
+</script>
+</body>
+</html>
