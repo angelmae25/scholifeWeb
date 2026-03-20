@@ -1,5 +1,5 @@
 // FILE PATH: src/main/java/com/scholife1/model/ActivityLog.java
-
+//hi
 package com.scholife1.model;
 
 import jakarta.persistence.*;
