@@ -43,25 +43,45 @@ public class StudentApiController {
     @PostMapping
     public ResponseEntity<?> create(@RequestBody Student student) {
         try {
+            // Validate required fields
+            if (student.getStudentId() == null || student.getStudentId().isBlank())
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "Student ID is required."));
+            if (student.getEmail() == null || student.getEmail().isBlank())
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "Email is required."));
+
+            // Duplicate checks
             if (studentRepository.existsByStudentId(student.getStudentId()))
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                         .body(Map.of("message", "Student ID already exists."));
             if (studentRepository.existsByEmail(student.getEmail()))
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                         .body(Map.of("message", "Email already registered."));
+
+            // ── FIX: student_number column is NOT NULL in your DB ─────────────
+            // If studentNumber is not sent (mobile app doesn't send it),
+            // copy it from studentId so the DB constraint is satisfied.
+            if (student.getStudentNumber() == null || student.getStudentNumber().isBlank())
+                student.setStudentNumber(student.getStudentId());
+
+            // Default status
             if (student.getStatus() == null)
-                student.setStatus(Student.Status.ACTIVE);
+                student.setStatus(Student.Status.PENDING);
 
             Student saved = studentRepository.save(student);
-            log("Student enrolled",
-                    saved.getFirstName() + " " + saved.getLastName() + " (" + saved.getStudentId() + ")",
+
+            log("Student registered via mobile app",
+                    saved.getFirstName() + " " + saved.getLastName()
+                            + " (" + saved.getStudentId() + ")",
                     ActivityLog.Category.STUDENTS, ActivityLog.LogStatus.SUCCESS);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
-                    "message",   "Student registered successfully.",
+                    "message",   "Account created! Waiting for admin approval.",
                     "studentId", saved.getId(),
                     "name",      saved.getFirstName() + " " + saved.getLastName()
             ));
+
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("message", "Failed: " + e.getMessage()));
@@ -78,7 +98,8 @@ public class StudentApiController {
             if (updated.getYearLevel() != null) s.setYearLevel(updated.getYearLevel());
             if (updated.getStatus()    != null) s.setStatus(updated.getStatus());
             Student saved = studentRepository.save(s);
-            log("Student updated", saved.getFirstName() + " " + saved.getLastName(),
+            log("Student updated",
+                    saved.getFirstName() + " " + saved.getLastName(),
                     ActivityLog.Category.STUDENTS, ActivityLog.LogStatus.SUCCESS);
             return ResponseEntity.ok(saved);
         }).orElse(ResponseEntity.notFound().build());

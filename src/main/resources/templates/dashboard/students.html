@@ -5,48 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SchoLife — Student Management</title>
     <link rel="stylesheet" th:href="@{/css/main.css}">
-    <!-- CSRF for JS HTTP methods -->
     <meta name="_csrf"        th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <style>
         .toolbar { display:flex; align-items:center; gap:0.8rem; margin-bottom:1.5rem; flex-wrap:wrap; }
         .toolbar .search-bar { flex:2; min-width:220px; }
-
-        /* Modal */
         .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:100; align-items:center; justify-content:center; }
         .modal-overlay.open { display:flex; }
         .modal { background:white; border-radius:16px; width:540px; max-width:95vw; padding:2rem; box-shadow:0 20px 60px rgba(0,0,0,0.18); }
         .modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; }
         .modal-title { font-size:1.15rem; font-weight:800; }
-        .modal-close { font-size:1.2rem; cursor:pointer; color:var(--text-light); padding:0.2rem 0.5rem; border-radius:6px; transition:background 0.12s; }
+        .modal-close { font-size:1.2rem; cursor:pointer; color:var(--text-light); padding:0.2rem 0.5rem; border-radius:6px; }
         .modal-close:hover { background:var(--border-soft); }
         .form-row { display:flex; gap:1rem; }
         .form-row .fg { flex:1; }
         .fg { margin-bottom:1rem; }
         .fg label { display:block; font-size:0.68rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-mid); margin-bottom:0.42rem; }
-        .fg input, .fg select {
-            width:100%; padding:0.72rem 1rem;
-            border:1.5px solid var(--border);
-            border-radius:10px; font-family:inherit;
-            font-size:0.9rem; color:var(--text-dark);
-            background:#F9FAFB; outline:none;
-            transition:border-color 0.15s, box-shadow 0.15s;
-            box-sizing:border-box;
-        }
+        .fg input, .fg select { width:100%; padding:0.72rem 1rem; border:1.5px solid var(--border); border-radius:10px; font-family:inherit; font-size:0.9rem; color:var(--text-dark); background:#F9FAFB; outline:none; transition:border-color 0.15s; box-sizing:border-box; }
         .fg input:focus, .fg select:focus { border-color:var(--crimson); box-shadow:0 0 0 3px rgba(123,28,53,0.08); }
-        .fg input.error, .fg select.error { border-color:#dc2626; box-shadow:0 0 0 3px rgba(220,38,38,0.08); }
-        .fg .field-error { font-size:0.72rem; color:#dc2626; margin-top:0.3rem; display:none; }
-        .fg.has-error .field-error { display:block; }
         .modal-footer { display:flex; gap:0.8rem; justify-content:flex-end; margin-top:1.5rem; }
-        .btn-cancel { padding:0.65rem 1.2rem; border:1.5px solid var(--border); border-radius:9px; background:white; font-family:inherit; font-size:0.87rem; cursor:pointer; }
-        .btn-cancel:hover { background:#f3f4f6; }
-        .btn-submit { padding:0.65rem 1.4rem; background:var(--crimson); color:white; border:none; border-radius:9px; font-family:inherit; font-size:0.87rem; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:0.4rem; transition:background 0.15s; }
-        .btn-submit:hover { background:#6b1830; }
-        .btn-submit:disabled { opacity:0.6; cursor:not-allowed; }
+
+        /* action buttons */
+        .action-row   { display:flex; gap:0.4rem; flex-wrap:wrap; }
+        .act-btn      { padding:0.28rem 0.65rem; border-radius:6px; font-size:0.74rem; font-weight:600; border:none; cursor:pointer; font-family:inherit; transition:all 0.13s; }
+        .act-approve  { background:#d1fae5; color:#065f46; }
+        .act-approve:hover { background:#a7f3d0; }
+        .act-edit     { background:#dbeafe; color:#1d4ed8; }
+        .act-edit:hover { background:#bfdbfe; }
+        .act-del      { background:#fee2e2; color:#dc2626; }
+        .act-del:hover  { background:#fecaca; }
+
+        /* mobile / web source tag */
+        .src-mobile { font-size:0.68rem; background:#ede9fe; color:#5b21b6; padding:2px 8px; border-radius:4px; font-weight:700; }
+        .src-web    { font-size:0.68rem; background:#f3f4f6; color:#6b7280;  padding:2px 8px; border-radius:4px; font-weight:600; }
+
+        /* highlight pending row */
+        tr.row-pending td { background:#fffbeb; }
+
+        /* stat grid 4 cols */
+        .stat-grid.g4 { grid-template-columns: repeat(4,1fr); }
     </style>
 </head>
 <body>
 <div class="app">
+
+    <!-- SIDEBAR -->
     <aside class="sidebar">
         <div class="sidebar-logo">SchoLife</div>
         <div class="nav-section">Main</div>
@@ -56,66 +59,104 @@
         <a th:href="@{/dashboard/students}"      class="nav-item active"><span class="nav-icon">🎓</span> Student Management</a>
         <a th:href="@{/dashboard/organizations}" class="nav-item"><span class="nav-icon">🏛️</span> Organization Management</a>
         <a th:href="@{/dashboard/roles}"         class="nav-item"><span class="nav-icon">🔑</span> Role Assignment</a>
+        <div class="nav-section">Communication</div>
+        <a th:href="@{/dashboard/messages}"      class="nav-item"><span class="nav-icon">💬</span> Messages</a>
         <div class="nav-section">System</div>
         <a th:href="@{/dashboard/admins}"        class="nav-item"><span class="nav-icon">⚙️</span> Admin Management</a>
         <div class="sidebar-footer">
-            <a th:href="@{/auth/logout}" class="nav-logout" onclick="return confirm('Are you sure you want to logout?')"><span class="nav-icon">🚪</span> Log out</a>
+            <a th:href="@{/auth/logout}" class="nav-logout"
+               onclick="return confirm('Are you sure you want to logout?')">
+                <span class="nav-icon">🚪</span> Log out
+            </a>
         </div>
     </aside>
 
+    <!-- MAIN -->
     <div class="main">
         <div class="topbar">
             <div class="topbar-brand">SchoLife <small>Admin Portal</small></div>
-            <div class="topbar-search"><span style="color:var(--text-light);">🔍</span><input type="text" placeholder="Search anything..."></div>
+            <div class="topbar-search">
+                <span style="color:var(--text-light);">🔍</span>
+                <input type="text" placeholder="Search anything...">
+            </div>
             <div class="topbar-right">
                 <div class="icon-btn">🔔</div>
                 <div class="user-pill">
                     <div class="user-avatar"
                          th:text="${#strings.substring(loggedInAdmin.firstName,0,1) + #strings.substring(loggedInAdmin.lastName,0,1)}">SA</div>
-                    <span th:text="${loggedInAdmin.firstName + ' ' + loggedInAdmin.lastName}">Super Admin</span>
+                    <span th:text="${loggedInAdmin.firstName + ' ' + loggedInAdmin.lastName}">Admin</span>
                 </div>
             </div>
         </div>
 
         <div class="content">
+
+            <!-- Page header -->
             <div class="page-header fu d0">
                 <div class="ph-left">
                     <h1>Student Management</h1>
-                    <p>Add, edit, or manage enrolled students</p>
+                    <p>Students registered via web portal and mobile app.</p>
                 </div>
                 <button class="btn btn-primary" onclick="openModal()">+ Add Student</button>
             </div>
 
-            <div class="toolbar fu d1">
+            <!-- STAT CARDS -->
+            <div class="stat-grid g4 fu d1">
+                <div class="stat-card">
+                    <div class="sc-blob" style="background:var(--crimson);"></div>
+                    <div class="sc-icon" style="background:#fde8ec;">🎓</div>
+                    <div class="sc-value" th:text="${students.size()}">0</div>
+                    <div class="sc-label">Total Students</div>
+                </div>
+                <div class="stat-card">
+                    <div class="sc-blob" style="background:#16a34a;"></div>
+                    <div class="sc-icon" style="background:#dcfce7;">✅</div>
+                    <div class="sc-value" id="cntActive">0</div>
+                    <div class="sc-label">Active</div>
+                </div>
+                <div class="stat-card">
+                    <div class="sc-blob" style="background:#f59e0b;"></div>
+                    <div class="sc-icon" style="background:#fef3c7;">⏳</div>
+                    <div class="sc-value" id="cntPending">0</div>
+                    <div class="sc-label">Pending Approval</div>
+                </div>
+                <div class="stat-card">
+                    <div class="sc-blob" style="background:#8b5cf6;"></div>
+                    <div class="sc-icon" style="background:#ede9fe;">📱</div>
+                    <div class="sc-value" id="cntMobile">0</div>
+                    <div class="sc-label">Mobile Sign-ups</div>
+                </div>
+            </div>
+
+            <!-- FILTER TOOLBAR -->
+            <div class="toolbar fu d2">
                 <div class="search-bar">
                     <span class="si">🔍</span>
-                    <input type="text" placeholder="Search students by name, ID, or program..." oninput="searchStudents(this.value)">
+                    <input type="text" id="tblSearch" placeholder="Search by name, ID or program…" oninput="filterTable()">
                 </div>
-                <select class="inline-select" onchange="filterStudents()">
-                    <option value="">All Programs</option>
-                    <option>BS Information Technology</option>
-                    <option>BS Computer Science</option>
-                    <option>BS Business Administration</option>
-                    <option>BS Nursing</option>
-                    <option>BS Education</option>
+                <select class="inline-select" id="fStatus" onchange="filterTable()">
+                    <option value="">All Status</option>
+                    <option value="ACTIVE">Active</option>
+                    <option value="PENDING">Pending</option>
+                    <option value="INACTIVE">Inactive</option>
                 </select>
-                <select class="inline-select" onchange="filterStudents()">
-                    <option value="">All Years</option>
-                    <option>1st Year</option>
-                    <option>2nd Year</option>
-                    <option>3rd Year</option>
-                    <option>4th Year</option>
+                <select class="inline-select" id="fSource" onchange="filterTable()">
+                    <option value="">All Sources</option>
+                    <option value="mobile">📱 Mobile</option>
+                    <option value="web">🖥 Web</option>
                 </select>
             </div>
 
-            <div class="card fu d2">
+            <!-- STUDENTS TABLE -->
+            <div class="card fu d3">
                 <div class="card-header">
-                    <span class="card-title">All Students
+                    <span class="card-title">
+                        All Students
                         <span style="font-weight:400;color:var(--text-light);font-size:0.83rem;"
-                              th:text="${totalStudents + ' records'}">0 records</span>
+                              th:text="'(' + ${students.size()} + ' records)'"></span>
                     </span>
-                    <button class="btn btn-outline">📄 Export CSV</button>
                 </div>
+
                 <table class="data-table" id="studentsTable">
                     <thead>
                     <tr>
@@ -123,218 +164,255 @@
                         <th>Student ID</th>
                         <th>Program</th>
                         <th>Year</th>
-                        <th>Organization</th>
+                        <th>Source</th>
+                        <th>Status</th>
                         <th>Actions</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="student : ${students}">
+
+                    <tr th:each="s : ${students}"
+                        th:classappend="${s.status.name() == 'PENDING'} ? 'row-pending'"
+                        th:data-status="${s.status.name()}"
+                        th:data-source="${s.password != null ? 'mobile' : 'web'}"
+                        th:data-search="${(s.firstName + ' ' + s.lastName + ' ' + s.studentId + ' ' + (s.program != null ? s.program : '')).toLowerCase()}">
+
+                        <!-- Name + email -->
                         <td>
-                            <div style="display:flex;align-items:center;gap:0.75rem;">
-                                <div class="user-avatar" style="width:34px;height:34px;font-size:0.78rem;"
-                                     th:text="${#strings.substring(student.firstName,0,1) + #strings.substring(student.lastName,0,1)}">AB</div>
+                            <div class="user-cell">
+                                <div class="av av-md" style="background:var(--crimson);"
+                                     th:text="${#strings.substring(s.firstName,0,1) + #strings.substring(s.lastName,0,1)}">ST</div>
                                 <div>
-                                    <div style="font-weight:600;font-size:0.9rem;" th:text="${student.firstName + ' ' + student.lastName}">Name</div>
-                                    <div style="font-size:0.78rem;color:var(--text-light);" th:text="${student.email}">email</div>
+                                    <div class="uc-name" th:text="${s.firstName + ' ' + s.lastName}">Name</div>
+                                    <div class="uc-sub"  th:text="${s.email}">email</div>
                                 </div>
                             </div>
                         </td>
-                        <td th:text="${student.studentId}">—</td>
-                        <td th:text="${student.program}">—</td>
-                        <td th:text="${student.yearLevel}">—</td>
-                        <td th:text="${student.organizationName != null ? student.organizationName : '—'}">—</td>
+
+                        <td th:text="${s.studentId}">—</td>
+                        <td th:text="${s.program   != null ? s.program   : '—'}">—</td>
+                        <td th:text="${s.yearLevel != null ? s.yearLevel : '—'}">—</td>
+
+                        <!-- Source tag: password != null means registered from Flutter -->
                         <td>
-                            <div style="display:flex;gap:0.4rem;">
-                                <button class="btn btn-outline btn-sm"
-                                        th:onclick="'editStudent(' + ${student.id} + ')'">Edit</button>
-                                <button class="btn btn-sm"
-                                        style="background:#fee2e2;color:#dc2626;border:none;"
-                                        th:onclick="'deleteStudent(' + ${student.id} + ')'">Delete</button>
+                            <span th:if="${s.password != null}" class="src-mobile">📱 Mobile</span>
+                            <span th:if="${s.password == null}" class="src-web">🖥 Web</span>
+                        </td>
+
+                        <!-- Status badge -->
+                        <td>
+                            <span th:if="${s.status.name() == 'ACTIVE'}"
+                                  class="status s-active">Active</span>
+                            <span th:if="${s.status.name() == 'INACTIVE'}"
+                                  class="status s-inactive">Inactive</span>
+                            <span th:if="${s.status.name() == 'PENDING'}"
+                                  class="status s-pending">⏳ Pending</span>
+                        </td>
+
+                        <!-- Actions -->
+                        <td>
+                            <div class="action-row">
+                                <!-- Approve button only shown for PENDING students -->
+                                <button th:if="${s.status.name() == 'PENDING'}"
+                                        class="act-btn act-approve"
+                                        th:data-id="${s.id}"
+                                        onclick="approveStudent(this)">✓ Approve</button>
+
+                                <button class="act-btn act-edit"
+                                        th:data-id="${s.id}"
+                                        onclick="toggleStatus(this)">Toggle</button>
+
+                                <button class="act-btn act-del"
+                                        th:data-id="${s.id}"
+                                        onclick="deleteStudent(this)">Delete</button>
                             </div>
                         </td>
                     </tr>
+
+                    <!-- Empty state -->
                     <tr th:if="${students == null or students.isEmpty()}">
-                        <td colspan="6" style="text-align:center;padding:2.5rem;color:var(--text-light);font-size:0.88rem;">
-                            No students found.
+                        <td colspan="7" style="text-align:center;padding:2.5rem;color:var(--text-light);font-size:0.88rem;">
+                            No students yet. Students who sign up on the mobile app will appear here.
                         </td>
                     </tr>
+
                     </tbody>
                 </table>
             </div>
+
         </div>
     </div>
 </div>
 
 <!-- ADD STUDENT MODAL -->
-<div class="modal-overlay" id="addModal" onclick="if(event.target===this) closeModal()">
+<div class="modal-overlay" id="addModal" onclick="if(event.target===this)closeModal()">
     <div class="modal">
         <div class="modal-header">
             <div class="modal-title">➕ Add New Student</div>
             <div class="modal-close" onclick="closeModal()">✕</div>
         </div>
-
-        <!-- Name row -->
         <div class="form-row">
-            <div class="fg" id="fg-firstName">
-                <label for="firstName">First Name</label>
-                <input type="text" id="firstName" placeholder="e.g. Maria" oninput="clearError('firstName')">
-                <div class="field-error">First name is required.</div>
-            </div>
-            <div class="fg" id="fg-lastName">
-                <label for="lastName">Last Name</label>
-                <input type="text" id="lastName" placeholder="e.g. Santos" oninput="clearError('lastName')">
-                <div class="field-error">Last name is required.</div>
-            </div>
+            <div class="fg"><label>First Name</label><input type="text" id="firstName" placeholder="First name"></div>
+            <div class="fg"><label>Last Name</label><input type="text" id="lastName" placeholder="Last name"></div>
         </div>
-
-        <!-- Student ID -->
-        <div class="fg" id="fg-studentId">
-            <label for="studentId">Student ID</label>
-            <input type="text" id="studentId" placeholder="e.g. 2024-00999" oninput="clearError('studentId')">
-            <div class="field-error">Student ID is required (e.g. 2024-00999).</div>
-        </div>
-
-        <!-- Email -->
-        <div class="fg" id="fg-email">
-            <label for="email">Email Address</label>
-            <input type="email" id="email" placeholder="student@school.edu" oninput="clearError('email')">
-            <div class="field-error">A valid email address is required.</div>
-        </div>
-
-        <!-- Program & Year -->
+        <div class="fg"><label>Student ID</label><input type="text" id="studentId" placeholder="e.g. 2024-00999"></div>
+        <div class="fg"><label>Email</label><input type="email" id="email" placeholder="student@school.edu"></div>
         <div class="form-row">
-            <div class="fg" id="fg-program">
-                <label for="program">Program</label>
-                <select id="program" onchange="clearError('program')">
-                    <option value="">— Select Program —</option>
-                    <option value="BS_INFORMATION_TECHNOLOGY">BS Information Technology</option>
-                    <option value="BS_COMPUTER_SCIENCE">BS Computer Science</option>
-                    <option value="BS_BUSINESS_ADMINISTRATION">BS Business Administration</option>
-                    <option value="BS_NURSING">BS Nursing</option>
-                    <option value="BS_EDUCATION">BS Education</option>
+            <div class="fg">
+                <label>Program</label>
+                <select id="program">
+                    <option value="">— Select —</option>
+                    <option>BS Information Technology</option>
+                    <option>BS Computer Science</option>
+                    <option>BS Business Administration</option>
+                    <option>BS Nursing</option>
+                    <option>BS Education</option>
                 </select>
-                <div class="field-error">Please select a program.</div>
             </div>
-            <div class="fg" id="fg-yearLevel">
-                <label for="yearLevel">Year Level</label>
+            <div class="fg">
+                <label>Year Level</label>
                 <select id="yearLevel">
-                    <option value="1ST_YEAR">1st Year</option>
-                    <option value="2ND_YEAR">2nd Year</option>
-                    <option value="3RD_YEAR">3rd Year</option>
-                    <option value="4TH_YEAR">4th Year</option>
+                    <option>1st Year</option>
+                    <option>2nd Year</option>
+                    <option>3rd Year</option>
+                    <option>4th Year</option>
                 </select>
             </div>
         </div>
-
+        <div id="modalErr" style="color:#dc2626;font-size:0.82rem;margin-top:0.4rem;display:none;"></div>
         <div class="modal-footer">
-            <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-            <button class="btn-submit" id="submitBtn" onclick="submitAddStudent()">
-                ➕ Add Student
-            </button>
+            <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-primary" id="submitBtn" onclick="submitStudent()">➕ Add Student</button>
         </div>
     </div>
 </div>
 
 <script th:src="@{/main.js}"></script>
 <script>
-    /* ── Modal open / close ── */
-    function openModal() {
-        resetForm();
-        document.getElementById('addModal').classList.add('open');
-        document.getElementById('firstName').focus();
-    }
+    const CSRF_TOKEN  = document.querySelector('meta[name="_csrf"]')?.content || '';
+    const CSRF_HEADER = document.querySelector('meta[name="_csrf_header"]')?.content || 'X-CSRF-TOKEN';
 
-    function closeModal() {
-        document.getElementById('addModal').classList.remove('open');
-        resetForm();
-    }
+    // ── Count stat cards ──────────────────────────────────────────────────────────
+    (function() {
+        let a = 0, p = 0, m = 0;
+        document.querySelectorAll('#studentsTable tbody tr[data-status]').forEach(r => {
+            if (r.dataset.status === 'ACTIVE')  a++;
+            if (r.dataset.status === 'PENDING') p++;
+            if (r.dataset.source === 'mobile')  m++;
+        });
+        document.getElementById('cntActive').textContent  = a;
+        document.getElementById('cntPending').textContent = p;
+        document.getElementById('cntMobile').textContent  = m;
+    })();
 
-    function resetForm() {
-        ['firstName','lastName','studentId','email','program','yearLevel'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-                el.value = (el.tagName === 'SELECT') ? el.options[0].value : '';
-                el.classList.remove('error');
-            }
-            clearError(id);
+    // ── Filter ────────────────────────────────────────────────────────────────────
+    function filterTable() {
+        const q  = document.getElementById('tblSearch').value.toLowerCase();
+        const st = document.getElementById('fStatus').value;
+        const sr = document.getElementById('fSource').value;
+        document.querySelectorAll('#studentsTable tbody tr[data-status]').forEach(r => {
+            const ok = (!q  || r.dataset.search.includes(q))
+                && (!st || r.dataset.status === st)
+                && (!sr || r.dataset.source === sr);
+            r.style.display = ok ? '' : 'none';
         });
     }
 
-    /* ── Validation helpers ── */
-    function setError(fieldId, msg) {
-        const fg = document.getElementById('fg-' + fieldId);
-        const input = document.getElementById(fieldId);
-        if (!fg || !input) return;
-        fg.classList.add('has-error');
-        input.classList.add('error');
-        if (msg) fg.querySelector('.field-error').textContent = msg;
+    // ── Modal ─────────────────────────────────────────────────────────────────────
+    function openModal()  { document.getElementById('addModal').classList.add('open'); }
+    function closeModal() {
+        document.getElementById('addModal').classList.remove('open');
+        document.getElementById('modalErr').style.display = 'none';
     }
 
-    function clearError(fieldId) {
-        const fg = document.getElementById('fg-' + fieldId);
-        const input = document.getElementById(fieldId);
-        if (!fg || !input) return;
-        fg.classList.remove('has-error');
-        input.classList.remove('error');
-    }
+    // ── Add student (web portal) → POST /api/students ─────────────────────────────
+    async function submitStudent() {
+        const err = document.getElementById('modalErr');
+        err.style.display = 'none';
+        const btn = document.getElementById('submitBtn');
 
-    function validateForm() {
-        let valid = true;
-        const firstName = document.getElementById('firstName').value.trim();
-        const lastName  = document.getElementById('lastName').value.trim();
-        const studentId = document.getElementById('studentId').value.trim();
-        const email     = document.getElementById('email').value.trim();
-        const program   = document.getElementById('program').value;
-
-        if (!firstName) { setError('firstName', 'First name is required.'); valid = false; }
-        if (!lastName)  { setError('lastName',  'Last name is required.');  valid = false; }
-        if (!studentId) {
-            setError('studentId', 'Student ID is required (e.g. 2024-00999).');
-            valid = false;
-        }
-        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            setError('email', 'A valid email address is required.');
-            valid = false;
-        }
-        if (!program) { setError('program', 'Please select a program.'); valid = false; }
-
-        return valid;
-    }
-
-    /* ── Submit handler — wire your API call here ── */
-    async function submitAddStudent() {
-        if (!validateForm()) return;
-
-        const student = {
-            firstName : document.getElementById('firstName').value.trim(),
-            lastName  : document.getElementById('lastName').value.trim(),
-            studentId : document.getElementById('studentId').value.trim(),
-            email     : document.getElementById('email').value.trim(),
-            program   : document.getElementById('program').value,
-            yearLevel : document.getElementById('yearLevel').value,
+        const payload = {
+            firstName: document.getElementById('firstName').value.trim(),
+            lastName:  document.getElementById('lastName').value.trim(),
+            studentId: document.getElementById('studentId').value.trim(),
+            email:     document.getElementById('email').value.trim(),
+            program:   document.getElementById('program').value,
+            yearLevel: document.getElementById('yearLevel').value,
+            status:    'ACTIVE',
         };
 
-        const btn = document.getElementById('submitBtn');
-        btn.disabled = true;
-        btn.textContent = 'Saving…';
+        if (!payload.firstName || !payload.lastName || !payload.studentId || !payload.email || !payload.program) {
+            err.textContent = 'All fields are required.';
+            err.style.display = 'block';
+            return;
+        }
+
+        btn.disabled = true; btn.textContent = 'Saving…';
 
         try {
-            // TODO: replace the block below with your actual API call
-            // e.g. const result = await StudentAPI.create(student);
-            // if (result.success) { closeModal(); location.reload(); }
-            console.log('Student payload ready:', student);
-
-            // Placeholder success feedback until API is connected:
-            showToast('Student added successfully!', 'success');
-            closeModal();
-            // location.reload(); // uncomment once API is wired
-        } catch (err) {
-            showToast('Failed to add student. Please try again.', 'error');
-            console.error(err);
+            const res  = await fetch('/api/students', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', [CSRF_HEADER]: CSRF_TOKEN },
+                body: JSON.stringify(payload),
+            });
+            const data = await res.json();
+            if (res.ok) { closeModal(); location.reload(); }
+            else { err.textContent = data.message || 'Failed to add student.'; err.style.display = 'block'; }
+        } catch (e) {
+            err.textContent = 'Network error.'; err.style.display = 'block';
         } finally {
-            btn.disabled = false;
-            btn.innerHTML = '➕ Add Student';
+            btn.disabled = false; btn.textContent = '➕ Add Student';
         }
+    }
+
+    // ── Approve pending student → PUT /api/students/{id} ─────────────────────────
+    async function approveStudent(btn) {
+        const id  = btn.dataset.id;
+        const res = await fetch(`/api/students/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', [CSRF_HEADER]: CSRF_TOKEN },
+            body: JSON.stringify({ status: 'ACTIVE' }),
+        });
+        if (res.ok) {
+            const row   = btn.closest('tr');
+            const badge = row.querySelector('.status');
+            badge.className   = 'status s-active';
+            badge.textContent = 'Active';
+            row.dataset.status = 'ACTIVE';
+            row.classList.remove('row-pending');
+            btn.remove();
+            // update counters
+            const p = document.getElementById('cntPending');
+            const a = document.getElementById('cntActive');
+            p.textContent = Math.max(0, +p.textContent - 1);
+            a.textContent = +a.textContent + 1;
+        }
+    }
+
+    // ── Toggle Active / Inactive → PATCH /api/students/{id}/status ───────────────
+    async function toggleStatus(btn) {
+        const res = await fetch(`/api/students/${btn.dataset.id}/status`, {
+            method: 'PATCH',
+            headers: { [CSRF_HEADER]: CSRF_TOKEN },
+        });
+        if (res.ok) {
+            const data  = await res.json();
+            const row   = btn.closest('tr');
+            const badge = row.querySelector('.status');
+            badge.className   = data.status === 'ACTIVE' ? 'status s-active' : 'status s-inactive';
+            badge.textContent = data.status === 'ACTIVE' ? 'Active' : 'Inactive';
+            row.dataset.status = data.status;
+        }
+    }
+
+    // ── Delete → DELETE /api/students/{id} ───────────────────────────────────────
+    async function deleteStudent(btn) {
+        if (!confirm('Delete this student?')) return;
+        const res = await fetch(`/api/students/${btn.dataset.id}`, {
+            method: 'DELETE',
+            headers: { [CSRF_HEADER]: CSRF_TOKEN },
+        });
+        if (res.ok) btn.closest('tr').remove();
     }
 </script>
 </body>

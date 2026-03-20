@@ -25,6 +25,15 @@ public class Student {
     @Column(unique = true, nullable = false)
     private String email;
 
+    // Maps to student_number column (NOT NULL in your DB)
+    @Column(name = "student_number")
+    private String studentNumber;
+
+    // NULL  = added by admin via web portal
+    // value = registered via Flutter mobile app
+    @Column(nullable = true)
+    private String password;
+
     private String program;
 
     @Column(name = "year_level")
@@ -41,12 +50,13 @@ public class Student {
 
     public enum Status { ACTIVE, INACTIVE, PENDING }
 
-    // Getters
     public Long getId()             { return id; }
     public String getStudentId()    { return studentId; }
+    public String getStudentNumber(){ return studentNumber; }
     public String getFirstName()    { return firstName; }
     public String getLastName()     { return lastName; }
     public String getEmail()        { return email; }
+    public String getPassword()     { return password; }
     public String getProgram()      { return program; }
     public String getYearLevel()    { return yearLevel; }
     public String getContact()      { return contact; }
@@ -55,15 +65,17 @@ public class Student {
     public LocalDateTime getCreatedAt() { return createdAt; }
 
     // Setters
-    public void setId(Long id)                      { this.id = id; }
-    public void setStudentId(String studentId)      { this.studentId = studentId; }
-    public void setFirstName(String firstName)      { this.firstName = firstName; }
-    public void setLastName(String lastName)        { this.lastName = lastName; }
-    public void setEmail(String email)              { this.email = email; }
-    public void setProgram(String program)          { this.program = program; }
-    public void setYearLevel(String yearLevel)      { this.yearLevel = yearLevel; }
-    public void setContact(String contact)          { this.contact = contact; }
-    public void setAddress(String address)          { this.address = address; }
-    public void setStatus(Status status)            { this.status = status; }
+    public void setId(Long id)                        { this.id = id; }
+    public void setStudentId(String studentId)        { this.studentId = studentId; }
+    public void setStudentNumber(String n)            { this.studentNumber = n; }
+    public void setFirstName(String firstName)        { this.firstName = firstName; }
+    public void setLastName(String lastName)          { this.lastName = lastName; }
+    public void setEmail(String email)                { this.email = email; }
+    public void setPassword(String password)          { this.password = password; }
+    public void setProgram(String program)            { this.program = program; }
+    public void setYearLevel(String yearLevel)        { this.yearLevel = yearLevel; }
+    public void setContact(String contact)            { this.contact = contact; }
+    public void setAddress(String address)            { this.address = address; }
+    public void setStatus(Status status)              { this.status = status; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }
