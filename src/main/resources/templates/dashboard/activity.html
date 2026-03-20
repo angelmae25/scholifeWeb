@@ -3,12 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SchoLife — Activity</title>
+    <title>SchoLife — Activity Log</title>
     <link rel="stylesheet" th:href="@{/css/main.css}">
+    <style>
+        .toolbar { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .toolbar .filter-tabs { flex: 1; }
+    </style>
 </head>
 <body>
 <div class="app">
-
     <aside class="sidebar">
         <div class="sidebar-logo">SchoLife</div>
         <div class="nav-section">Main</div>
@@ -22,23 +25,15 @@
         <a th:href="@{/dashboard/messages}"      class="nav-item"><span class="nav-icon">💬</span> Messages <span class="nav-badge">3</span></a>
         <div class="nav-section">System</div>
         <a th:href="@{/dashboard/admins}"        class="nav-item"><span class="nav-icon">⚙️</span> Admin Management</a>
-        <div class="sidebar-footer">
-            <a th:href="@{/logout}" class="nav-logout" onclick="return confirm('Are you sure you want to logout?')">
-                <span class="nav-icon">🚪</span> Log out
-            </a>
-        </div>
+        <div class="sidebar-footer"><a th:href="@{/auth/logout}" class="nav-logout" onclick="return confirm('Are you sure you want to logout?')"><span>🚪</span> Log out</a></div>
     </aside>
 
     <div class="main">
         <div class="topbar">
             <div class="topbar-brand">SchoLife <small>Admin Portal</small></div>
-            <div class="topbar-search">
-                <span style="color:var(--text-light);">🔍</span>
-                <input type="text" placeholder="Search anything...">
-            </div>
+            <div class="topbar-search"><span>🔍</span><input type="text" placeholder="Search anything..."></div>
             <div class="topbar-right">
-                <div class="icon-btn">🔔</div>
-                <div class="icon-btn">⊞</div>
+                <div class="icon-btn">🔔</div><div class="icon-btn">⊞</div>
                 <div class="user-pill"><div class="user-avatar">SA</div><span>Super Admin</span></div>
             </div>
         </div>
@@ -46,77 +41,115 @@
         <div class="content">
             <div class="page-header fu d0">
                 <div class="ph-left">
-                    <h1>Activity</h1>
-                    <p>Full system event log and audit trail.</p>
+                    <h1>Activity Log</h1>
+                    <p>Track all system events and user actions</p>
                 </div>
-                <button class="btn btn-outline">⬇ Export Log</button>
             </div>
 
-            <div class="card fu d1">
-                <div class="card-header">
-                    <span class="card-title">System Activity Log</span>
-                    <span class="badge b-red">12 New</span>
+            <div class="toolbar fu d1">
+                <div class="filter-tabs">
+                    <button class="ftab active" onclick="filterTab(this,'all')">All</button>
+                    <button class="ftab" onclick="filterTab(this,'students')">Students</button>
+                    <button class="ftab" onclick="filterTab(this,'organizations')">Organizations</button>
+                    <button class="ftab" onclick="filterTab(this,'roles')">Roles</button>
+                    <button class="ftab" onclick="filterTab(this,'system')">System</button>
                 </div>
+            </div>
 
-                <div class="activity-entry">
-                    <div class="act-icon" style="background:var(--crimson-muted);">🎓</div>
-                    <div class="act-body">
-                        <div class="act-text"><strong>Maria Santos</strong> was enrolled in <strong>BSIT</strong> program by Admin</div>
-                        <div class="act-time">March 18, 2026 · 10:42 AM</div>
-                    </div>
+            <div class="card fu d2">
+                <div class="card-header">
+                    <span class="card-title">All Recent Activities</span>
+                    <button class="btn btn-outline">⬜ Export</button>
                 </div>
-                <div class="activity-entry">
-                    <div class="act-icon" style="background:var(--gold-light);">🏛️</div>
-                    <div class="act-body">
-                        <div class="act-text"><strong>JPCS Organization</strong> membership updated — 5 new members added</div>
-                        <div class="act-time">March 18, 2026 · 10:24 AM</div>
-                    </div>
-                </div>
-                <div class="activity-entry">
-                    <div class="act-icon" style="background:var(--blue-bg);">🔑</div>
-                    <div class="act-body">
-                        <div class="act-text"><strong>Juan dela Cruz</strong> assigned role of <strong>Treasurer</strong> in JPCS</div>
-                        <div class="act-time">March 18, 2026 · 09:48 AM</div>
-                    </div>
-                </div>
-                <div class="activity-entry">
-                    <div class="act-icon" style="background:var(--green-bg);">🔐</div>
-                    <div class="act-body">
-                        <div class="act-text"><strong>Admin login</strong> — admin@scholife.edu logged in successfully</div>
-                        <div class="act-time">March 18, 2026 · 08:30 AM</div>
-                    </div>
-                </div>
-                <div class="activity-entry">
-                    <div class="act-icon" style="background:var(--yellow-bg);">⚠️</div>
-                    <div class="act-body">
-                        <div class="act-text"><strong>Rico Lim</strong> status changed to <strong>Pending</strong> — awaiting document verification</div>
-                        <div class="act-time">March 18, 2026 · 07:55 AM</div>
-                    </div>
-                </div>
-                <div class="activity-entry">
-                    <div class="act-icon" style="background:var(--crimson-muted);">🗑️</div>
-                    <div class="act-body">
-                        <div class="act-text"><strong>Ana Reyes</strong> removed from <strong>Debate Club</strong> organization</div>
-                        <div class="act-time">March 17, 2026 · 04:10 PM</div>
-                    </div>
-                </div>
-                <div class="activity-entry">
-                    <div class="act-icon" style="background:var(--blue-bg);">📝</div>
-                    <div class="act-body">
-                        <div class="act-text">New organization <strong>Photography Guild</strong> created and activated</div>
-                        <div class="act-time">March 17, 2026 · 02:33 PM</div>
-                    </div>
-                </div>
-                <div class="activity-entry">
-                    <div class="act-icon" style="background:var(--green-bg);">✅</div>
-                    <div class="act-body">
-                        <div class="act-text"><strong>12 students</strong> from Engineering successfully migrated to new semester</div>
-                        <div class="act-time">March 17, 2026 · 11:00 AM</div>
-                    </div>
-                </div>
+                <table class="data-table" id="activityTable">
+                    <thead>
+                    <tr>
+                        <th>Event</th>
+                        <th>User / Entity</th>
+                        <th>Category</th>
+                        <th>IP Address</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr data-cat="students">
+                        <td>Student enrolled</td>
+                        <td><div class="user-cell"><div class="av av-sm" style="background:#7B1C35;">MS</div><div><div class="uc-name">Maria Santos</div><div class="uc-sub">2024-00124</div></div></div></td>
+                        <td><span class="badge b-crimson">● Students</span></td>
+                        <td style="font-family:monospace;font-size:0.82rem;">192.168.1.101</td>
+                        <td>2 min ago</td>
+                        <td><span class="status s-active">Success</span></td>
+                    </tr>
+                    <tr data-cat="organizations">
+                        <td>Organization updated</td>
+                        <td><div class="user-cell"><div class="av av-sm" style="background:#C9930A;">JP</div><div><div class="uc-name">JPCS (org_042)</div></div></div></td>
+                        <td><span class="badge b-gold">● Organizations</span></td>
+                        <td style="font-family:monospace;font-size:0.82rem;">192.168.1.55</td>
+                        <td>18 min ago</td>
+                        <td><span class="status s-active">Success</span></td>
+                    </tr>
+                    <tr data-cat="roles">
+                        <td>Role assigned</td>
+                        <td><div class="user-cell"><div class="av av-sm" style="background:#5C1427;">JD</div><div><div class="uc-name">Juan dela Cruz → Treasurer</div></div></div></td>
+                        <td><span class="badge b-blue">● Roles</span></td>
+                        <td style="font-family:monospace;font-size:0.82rem;">192.168.1.22</td>
+                        <td>1 hr ago</td>
+                        <td><span class="status s-active">Success</span></td>
+                    </tr>
+                    <tr data-cat="system">
+                        <td>Admin login</td>
+                        <td><span class="badge b-gray">● System</span></td>
+                        <td style="font-family:monospace;font-size:0.82rem;">192.168.1.1</td>
+                        <td>2 hr ago</td>
+                        <td><span class="status s-active">Success</span></td>
+                    </tr>
+                    <tr data-cat="students">
+                        <td>Student status changed</td>
+                        <td><div class="user-cell"><div class="av av-sm" style="background:#9B2D46;">RL</div><div><div class="uc-name">Rico Lim (2021-00233)</div></div></div></td>
+                        <td><span class="badge b-crimson">● Students</span></td>
+                        <td style="font-family:monospace;font-size:0.82rem;">192.168.1.101</td>
+                        <td>3 hr ago</td>
+                        <td><span class="status s-pending">Pending</span></td>
+                    </tr>
+                    <tr data-cat="organizations">
+                        <td>New org created</td>
+                        <td><div class="user-cell"><div class="av av-sm" style="background:#C9930A;">RA</div><div><div class="uc-name">Robotics Club (org_051)</div></div></div></td>
+                        <td><span class="badge b-gold">● Organizations</span></td>
+                        <td style="font-family:monospace;font-size:0.82rem;">192.168.1.55</td>
+                        <td>5 hr ago</td>
+                        <td><span class="status s-active">Success</span></td>
+                    </tr>
+                    <tr data-cat="system">
+                        <td>Admin account created</td>
+                        <td><div class="user-cell"><div class="av av-sm" style="background:#9B2D46;">LR</div><div><div class="uc-name">Liza Reyes (admin_009)</div></div></div></td>
+                        <td><span class="badge b-gray">● System</span></td>
+                        <td style="font-family:monospace;font-size:0.82rem;">192.168.1.1</td>
+                        <td>6 hr ago</td>
+                        <td><span class="status s-active">Success</span></td>
+                    </tr>
+                    <tr data-cat="students">
+                        <td>Student record updated</td>
+                        <td><div class="user-cell"><div class="av av-sm" style="background:#5C1427;">AR</div><div><div class="uc-name">Ana Reyes (2022-00456)</div></div></div></td>
+                        <td><span class="badge b-crimson">● Students</span></td>
+                        <td style="font-family:monospace;font-size:0.82rem;">192.168.1.101</td>
+                        <td>8 hr ago</td>
+                        <td><span class="status s-active">Success</span></td>
+                    </tr>
+                    <tr data-cat="roles">
+                        <td>Role removed</td>
+                        <td><div class="user-cell"><div class="av av-sm" style="background:#7B1C35;">SG</div><div><div class="uc-name">Sofia Garcia → Secretary</div></div></div></td>
+                        <td><span class="badge b-blue">● Roles</span></td>
+                        <td style="font-family:monospace;font-size:0.82rem;">192.168.1.22</td>
+                        <td>1 day ago</td>
+                        <td><span class="status s-inactive">Failed</span></td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
-</body>
-</html>
+
+function filterTab(el, cat) {
+document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));

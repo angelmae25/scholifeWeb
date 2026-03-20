@@ -5,10 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SchoLife — Admin Management</title>
     <link rel="stylesheet" th:href="@{/css/main.css}">
+    <style>
+        .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:100; align-items:center; justify-content:center; }
+        .modal-overlay.open { display:flex; }
+        .modal { background:white; border-radius:16px; width:500px; max-width:95vw; padding:2rem; box-shadow:0 20px 60px rgba(0,0,0,0.18); }
+        .modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; }
+        .modal-title { font-size:1.1rem; font-weight:800; }
+        .modal-close { cursor:pointer; color:var(--text-light); padding:0.2rem 0.5rem; border-radius:6px; }
+        .modal-close:hover { background:var(--border-soft); }
+        .form-row { display:flex; gap:1rem; }
+        .form-row .fg { flex:1; }
+        .fg { margin-bottom:1rem; }
+        .fg label { display:block; font-size:0.68rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-mid); margin-bottom:0.42rem; }
+        .fg input, .fg select { width:100%; padding:0.72rem 1rem; border:1.5px solid var(--border); border-radius:10px; font-family:inherit; font-size:0.9rem; color:var(--text-dark); background:#F9FAFB; outline:none; transition:border-color 0.15s; }
+        .fg input:focus, .fg select:focus { border-color:var(--crimson); }
+        .modal-footer { display:flex; gap:0.8rem; justify-content:flex-end; margin-top:1.5rem; }
+
+        .action-row { display:flex; gap:0.4rem; }
+        .act-btn { padding:0.3rem 0.6rem; border-radius:6px; font-size:0.75rem; font-weight:600; border:none; cursor:pointer; font-family:inherit; transition:all 0.13s; }
+        .act-edit { background:var(--blue-bg); color:var(--blue); }
+        .act-edit:hover { background:#bfdbfe; }
+        .act-del  { background:var(--red-bg); color:var(--red); }
+        .act-del:hover  { background:#fecaca; }
+    </style>
 </head>
 <body>
 <div class="app">
-
     <aside class="sidebar">
         <div class="sidebar-logo">SchoLife</div>
         <div class="nav-section">Main</div>
@@ -22,23 +44,15 @@
         <a th:href="@{/dashboard/messages}"      class="nav-item"><span class="nav-icon">💬</span> Messages <span class="nav-badge">3</span></a>
         <div class="nav-section">System</div>
         <a th:href="@{/dashboard/admins}"        class="nav-item active"><span class="nav-icon">⚙️</span> Admin Management</a>
-        <div class="sidebar-footer">
-            <a th:href="@{/logout}" class="nav-logout" onclick="return confirm('Are you sure you want to logout?')">
-                <span class="nav-icon">🚪</span> Log out
-            </a>
-        </div>
+        <div class="sidebar-footer"><a th:href="@{/auth/logout}" class="nav-logout" onclick="return confirm('Are you sure you want to logout?')"><span>🚪</span> Log out</a></div>
     </aside>
 
     <div class="main">
         <div class="topbar">
             <div class="topbar-brand">SchoLife <small>Admin Portal</small></div>
-            <div class="topbar-search">
-                <span style="color:var(--text-light);">🔍</span>
-                <input type="text" placeholder="Search anything...">
-            </div>
+            <div class="topbar-search"><span>🔍</span><input type="text" placeholder="Search anything..."></div>
             <div class="topbar-right">
-                <div class="icon-btn">🔔</div>
-                <div class="icon-btn">⊞</div>
+                <div class="icon-btn">🔔</div><div class="icon-btn">⊞</div>
                 <div class="user-pill"><div class="user-avatar">SA</div><span>Super Admin</span></div>
             </div>
         </div>
@@ -47,56 +61,94 @@
             <div class="page-header fu d0">
                 <div class="ph-left">
                     <h1>Admin Management</h1>
-                    <p>Manage system administrators and access levels.</p>
+                    <p>Manage administrator accounts and permissions</p>
                 </div>
-                <button class="btn btn-primary">+ Add Admin</button>
+                <button class="btn btn-primary" onclick="openModal()">+ Add Admin</button>
             </div>
 
-            <div class="card fu d1">
-                <table class="data-table">
+            <!-- STAT CARDS -->
+            <div class="stat-grid g3 fu d1">
+                <div class="stat-card">
+                    <div class="sc-icon" style="background:#fde8ec;">👤</div>
+                    <div class="sc-value">9</div>
+                    <div class="sc-label">Total Admins</div>
+                    <div class="sc-blob" style="background:var(--crimson);"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="sc-icon" style="background:var(--gold-light);">✅</div>
+                    <div class="sc-value">7</div>
+                    <div class="sc-label">Active Admins</div>
+                    <div class="sc-blob" style="background:var(--gold);"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="sc-icon" style="background:var(--green-bg);">⭐</div>
+                    <div class="sc-value">1</div>
+                    <div class="sc-label">Super Admins</div>
+                    <div class="sc-blob" style="background:var(--green);"></div>
+                </div>
+            </div>
+
+            <div class="card fu d2">
+                <div class="card-header">
+                    <span class="card-title">All Administrators</span>
+                    <div class="search-bar" style="width:260px;">
+                        <span class="si">🔍</span>
+                        <input type="text" placeholder="Search admins..." oninput="searchAdmins(this.value)">
+                    </div>
+                </div>
+                <table class="data-table" id="adminsTable">
                     <thead>
-                    <tr><th>Name</th><th>Email</th><th>Role</th><th>Last Login</th><th>Status</th><th>Actions</th></tr>
+                    <tr>
+                        <th>Admin</th>
+                        <th>Email</th>
+                        <th>Role Level</th>
+                        <th>Last Login</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
                     </thead>
                     <tbody>
                     <tr>
-                        <td><div class="user-cell"><div class="av av-sm" style="background:var(--crimson);">SA</div><div><div class="uc-name">Super Admin</div><div class="uc-sub">Full system access</div></div></div></td>
-                        <td>admin@scholife.edu</td>
+                        <td><div class="user-cell"><div class="av av-md" style="background:#7B1C35;">SA</div><div><div class="uc-name">Super Admin</div></div></div></td>
                         <td><span class="badge b-crimson">Super Admin</span></td>
-                        <td>Today, 8:30 AM</td>
+                        <td>Just now</td>
                         <td><span class="status s-active">Active</span></td>
-                        <td><div class="tbl-actions"><button class="btn btn-outline btn-sm">Edit</button></div></td>
+                        <td><div class="action-row"><button class="act-btn act-edit">Edit</button></div></td>
                     </tr>
                     <tr>
-                        <td><div class="user-cell"><div class="av av-sm" style="background:var(--blue);">RA</div><div><div class="uc-name">Registrar Admin</div><div class="uc-sub">Student records access</div></div></div></td>
-                        <td>registrar@scholife.edu</td>
-                        <td><span class="badge b-blue">Registrar</span></td>
-                        <td>Today, 9:00 AM</td>
+                        <td><div class="user-cell"><div class="av av-md" style="background:#9B2D46;">LR</div><div><div class="uc-name">Liza Reyes</div></div></div></td>
+                        <td><span class="badge b-crimson">Admin</span></td>
+                        <td>2 hours ago</td>
                         <td><span class="status s-active">Active</span></td>
-                        <td><div class="tbl-actions"><button class="btn btn-outline btn-sm">Edit</button><button class="btn btn-outline btn-sm">Suspend</button></div></td>
+                        <td><div class="action-row"><button class="act-btn act-edit">Edit</button><button class="act-btn act-del">Remove</button></div></td>
                     </tr>
                     <tr>
-                        <td><div class="user-cell"><div class="av av-sm" style="background:var(--gold);">OA</div><div><div class="uc-name">OSA Admin</div><div class="uc-sub">Organization affairs</div></div></div></td>
-                        <td>osa@scholife.edu</td>
-                        <td><span class="badge b-gold">OSA Staff</span></td>
-                        <td>Mar 17, 3:12 PM</td>
+                        <td><div class="user-cell"><div class="av av-md" style="background:#5C1427;">MT</div><div><div class="uc-name">Mark Torres</div></div></div></td>
+                        <td><span class="badge b-crimson">Admin</span></td>
+                        <td>Yesterday</td>
                         <td><span class="status s-active">Active</span></td>
-                        <td><div class="tbl-actions"><button class="btn btn-outline btn-sm">Edit</button><button class="btn btn-outline btn-sm">Suspend</button></div></td>
+                        <td><div class="action-row"><button class="act-btn act-edit">Edit</button><button class="act-btn act-del">Remove</button></div></td>
                     </tr>
                     <tr>
-                        <td><div class="user-cell"><div class="av av-sm" style="background:var(--green);">FA</div><div><div class="uc-name">Finance Admin</div><div class="uc-sub">Financial records access</div></div></div></td>
-                        <td>finance@scholife.edu</td>
-                        <td><span class="badge b-green">Finance</span></td>
-                        <td>Mar 16, 11:45 AM</td>
+                        <td><div class="user-cell"><div class="av av-md" style="background:#C9930A;">CU</div><div><div class="uc-name">Claire Uy</div></div></div></td>
+                        <td><span class="badge b-gold">Moderator</span></td>
+                        <td>2 days ago</td>
+                        <td><span class="status s-active">Active</span></td>
+                        <td><div class="action-row"><button class="act-btn act-edit">Edit</button><button class="act-btn act-del">Remove</button></div></td>
+                    </tr>
+                    <tr>
+                        <td><div class="user-cell"><div class="av av-md" style="background:#7B1C35;">DS</div><div><div class="uc-name">Dennis Santos</div></div></div></td>
+                        <td><span class="badge b-blue">Viewer</span></td>
+                        <td>1 week ago</td>
                         <td><span class="status s-inactive">Inactive</span></td>
-                        <td><div class="tbl-actions"><button class="btn btn-outline btn-sm">Edit</button><button class="btn btn-outline btn-sm">Activate</button></div></td>
+                        <td><div class="action-row"><button class="act-btn act-edit">Edit</button><button class="act-btn act-del">Remove</button></div></td>
                     </tr>
                     <tr>
-                        <td><div class="user-cell"><div class="av av-sm" style="background:#6B7280;">IT</div><div><div class="uc-name">IT Admin</div><div class="uc-sub">System configuration</div></div></div></td>
-                        <td>it@scholife.edu</td>
-                        <td><span class="badge b-gray">IT Staff</span></td>
-                        <td>Mar 15, 2:00 PM</td>
+                        <td><div class="user-cell"><div class="av av-md" style="background:#9B2D46;">JB</div><div><div class="uc-name">Jose Bautista</div></div></div></td>
+                        <td><span class="badge b-gold">Moderator</span></td>
+                        <td>3 days ago</td>
                         <td><span class="status s-active">Active</span></td>
-                        <td><div class="tbl-actions"><button class="btn btn-outline btn-sm">Edit</button><button class="btn btn-outline btn-sm">Suspend</button></div></td>
+                        <td><div class="action-row"><button class="act-btn act-edit">Edit</button><button class="act-btn act-del">Remove</button></div></td>
                     </tr>
                     </tbody>
                 </table>
@@ -104,5 +156,22 @@
         </div>
     </div>
 </div>
-</body>
-</html>
+
+<div class="modal-overlay" id="addModal" onclick="if(event.target===this)closeModal()">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">Add New Admin</div>
+            <div class="modal-close" onclick="closeModal()">✕</div>
+        </div>
+        <div class="form-row">
+            <div class="fg"><label>First Name</label><input type="text" placeholder="First name"></div>
+            <div class="fg"><label>Last Name</label><input type="text" placeholder="Last name"></div>
+        </div>
+        <div class="fg"><label>Email Address</label><input type="email" placeholder="admin@scholife.edu"></div>
+        <div class="fg"><label>Role Level</label>
+            <select>
+                <option>Viewer</option>
+                <option>Moderator</option>
+                <option>Admin</option>
+                <option>Super Admin</option>
+            </select>

@@ -1,3 +1,5 @@
+// FILE PATH: src/main/java/com/scholife1/service/StudentService.java
+
 package com.scholife1.service;
 
 import com.scholife1.model.Student;
@@ -29,9 +31,9 @@ public class StudentService {
         studentRepository.deleteById(id);
     }
 
-    public Student updateStatus(Long id, Student.Status status) {
+    public Student updateStatus(Long id, Student.Status newStatus) {
         Student s = getById(id);
-        s.setStatus(status);
+        s.setStatus(newStatus);
         return studentRepository.save(s);
     }
 }

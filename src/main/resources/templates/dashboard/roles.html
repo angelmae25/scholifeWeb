@@ -5,10 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SchoLife — Role Assignment</title>
     <link rel="stylesheet" th:href="@{/css/main.css}">
+    <style>
+        .roles-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+        .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; padding: 1.2rem; }
+
+        .role-card {
+            border: 1.5px solid var(--border);
+            border-radius: 12px; padding: 1.2rem;
+            cursor: pointer; transition: all 0.16s;
+        }
+        .role-card:hover { border-color: var(--crimson-border); background: var(--crimson-muted); transform: translateY(-1px); }
+        .role-card.selected { border-color: var(--crimson); background: var(--crimson-muted); }
+        .rc-name { font-weight: 800; font-size: 0.97rem; margin-bottom: 0.4rem; color: var(--text-dark); }
+        .rc-desc { font-size: 0.78rem; color: var(--text-light); line-height: 1.5; margin-bottom: 0.7rem; }
+        .rc-count { font-size: 0.78rem; font-weight: 700; color: var(--crimson); }
+
+        .dist-body { padding: 1.2rem 1.5rem; }
+        .dist-row { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.9rem; }
+        .dist-name { width: 100px; text-align: right; font-size: 0.83rem; color: var(--text-mid); flex-shrink: 0; }
+        .dist-track { flex: 1; height: 10px; background: #EEEFF1; border-radius: 99px; overflow: hidden; }
+        .dist-fill  { height: 100%; border-radius: 99px; transition: width 0.6s ease; }
+        .dist-count { font-size: 0.83rem; font-weight: 700; width: 26px; text-align: right; }
+
+        /* Modal */
+        .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:100; align-items:center; justify-content:center; }
+        .modal-overlay.open { display:flex; }
+        .modal { background:white; border-radius:16px; width:480px; max-width:95vw; padding:2rem; box-shadow:0 20px 60px rgba(0,0,0,0.18); }
+        .modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; }
+        .modal-title { font-size:1.1rem; font-weight:800; }
+        .modal-close { cursor:pointer; color:var(--text-light); padding:0.2rem 0.5rem; border-radius:6px; }
+        .modal-close:hover { background:var(--border-soft); }
+        .fg { margin-bottom:1rem; }
+        .fg label { display:block; font-size:0.68rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-mid); margin-bottom:0.42rem; }
+        .fg input, .fg select { width:100%; padding:0.72rem 1rem; border:1.5px solid var(--border); border-radius:10px; font-family:inherit; font-size:0.9rem; color:var(--text-dark); background:#F9FAFB; outline:none; transition:border-color 0.15s; }
+        .fg input:focus, .fg select:focus { border-color:var(--crimson); }
+        .modal-footer { display:flex; gap:0.8rem; justify-content:flex-end; margin-top:1.5rem; }
+    </style>
 </head>
 <body>
 <div class="app">
-
     <aside class="sidebar">
         <div class="sidebar-logo">SchoLife</div>
         <div class="nav-section">Main</div>
@@ -22,23 +57,15 @@
         <a th:href="@{/dashboard/messages}"      class="nav-item"><span class="nav-icon">💬</span> Messages <span class="nav-badge">3</span></a>
         <div class="nav-section">System</div>
         <a th:href="@{/dashboard/admins}"        class="nav-item"><span class="nav-icon">⚙️</span> Admin Management</a>
-        <div class="sidebar-footer">
-            <a th:href="@{/logout}" class="nav-logout" onclick="return confirm('Are you sure you want to logout?')">
-                <span class="nav-icon">🚪</span> Log out
-            </a>
-        </div>
+        <div class="sidebar-footer"><a th:href="@{/auth/logout}" class="nav-logout" onclick="return confirm('Are you sure you want to logout?')"><span>🚪</span> Log out</a></div>
     </aside>
 
     <div class="main">
         <div class="topbar">
             <div class="topbar-brand">SchoLife <small>Admin Portal</small></div>
-            <div class="topbar-search">
-                <span style="color:var(--text-light);">🔍</span>
-                <input type="text" placeholder="Search anything...">
-            </div>
+            <div class="topbar-search"><span>🔍</span><input type="text" placeholder="Search anything..."></div>
             <div class="topbar-right">
-                <div class="icon-btn">🔔</div>
-                <div class="icon-btn">⊞</div>
+                <div class="icon-btn">🔔</div><div class="icon-btn">⊞</div>
                 <div class="user-pill"><div class="user-avatar">SA</div><span>Super Admin</span></div>
             </div>
         </div>
@@ -47,104 +74,96 @@
             <div class="page-header fu d0">
                 <div class="ph-left">
                     <h1>Role Assignment</h1>
-                    <p>Manage and assign organizational roles to students.</p>
+                    <p>Assign and manage roles within organizations</p>
                 </div>
-                <button class="btn btn-primary">+ Create Role</button>
+                <button class="btn btn-primary" onclick="openModal()">+ Assign Role</button>
             </div>
 
-            <!-- Recent Assignments -->
-            <div class="card fu d1" style="margin-bottom:1.2rem;">
-                <div class="card-header"><span class="card-title">Recent Assignments</span></div>
-                <table class="data-table">
-                    <thead>
-                    <tr><th>Student</th><th>Role</th><th>Organization</th><th>Assigned By</th><th>Date</th><th>Actions</th></tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td><div class="user-cell"><div class="av av-sm" style="background:var(--blue);">JC</div><div class="uc-name">Juan dela Cruz</div></div></td>
-                        <td><span class="badge b-blue">Treasurer</span></td>
-                        <td>JPCS</td><td>Super Admin</td><td>Mar 18, 2026</td>
-                        <td><button class="btn btn-outline btn-sm">Revoke</button></td>
-                    </tr>
-                    <tr>
-                        <td><div class="user-cell"><div class="av av-sm" style="background:var(--crimson);">MS</div><div class="uc-name">Maria Santos</div></div></td>
-                        <td><span class="badge b-crimson">President</span></td>
-                        <td>Engineering Society</td><td>Super Admin</td><td>Mar 15, 2026</td>
-                        <td><button class="btn btn-outline btn-sm">Revoke</button></td>
-                    </tr>
-                    <tr>
-                        <td><div class="user-cell"><div class="av av-sm" style="background:var(--green);">AR</div><div class="uc-name">Ana Reyes</div></div></td>
-                        <td><span class="badge b-gold">Secretary</span></td>
-                        <td>Red Cross Youth</td><td>Super Admin</td><td>Mar 12, 2026</td>
-                        <td><button class="btn btn-outline btn-sm">Revoke</button></td>
-                    </tr>
-                    <tr>
-                        <td><div class="user-cell"><div class="av av-sm" style="background:#8B5CF6;">LF</div><div class="uc-name">Liza Flores</div></div></td>
-                        <td><span class="badge b-green">Vice President</span></td>
-                        <td>Debate Club</td><td>Super Admin</td><td>Mar 10, 2026</td>
-                        <td><button class="btn btn-outline btn-sm">Revoke</button></td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
+            <div class="roles-layout fu d1">
+                <!-- Available Roles -->
+                <div class="card">
+                    <div class="card-header"><span class="card-title">Available Roles</span></div>
+                    <div class="role-grid">
+                        <div class="role-card selected" onclick="selectRole(this)">
+                            <div class="rc-name">President</div>
+                            <div class="rc-desc">Leads the organization and represents it in all activities.</div>
+                            <div class="rc-count">34 assigned</div>
+                        </div>
+                        <div class="role-card" onclick="selectRole(this)">
+                            <div class="rc-name">Vice President</div>
+                            <div class="rc-desc">Assists the president and oversees committees.</div>
+                            <div class="rc-count">34 assigned</div>
+                        </div>
+                        <div class="role-card" onclick="selectRole(this)">
+                            <div class="rc-name">Secretary</div>
+                            <div class="rc-desc">Handles minutes, records and correspondence.</div>
+                            <div class="rc-count">34 assigned</div>
+                        </div>
+                        <div class="role-card" onclick="selectRole(this)">
+                            <div class="rc-name">Treasurer</div>
+                            <div class="rc-desc">Manages financial records and budgeting.</div>
+                            <div class="rc-count">32 assigned</div>
+                        </div>
+                        <div class="role-card" onclick="selectRole(this)">
+                            <div class="rc-name">Auditor</div>
+                            <div class="rc-desc">Reviews and verifies financial transactions.</div>
+                            <div class="rc-count">28 assigned</div>
+                        </div>
+                        <div class="role-card" onclick="selectRole(this)">
+                            <div class="rc-name">PRO</div>
+                            <div class="rc-desc">Manages public relations and promotions.</div>
+                            <div class="rc-count">30 assigned</div>
+                        </div>
+                    </div>
+                </div>
 
-            <!-- Available Roles -->
-            <div class="card fu d2">
-                <div class="card-header"><span class="card-title">Available Roles</span></div>
-                <div class="role-grid">
-                    <div class="role-card">
-                        <div class="role-card-title">🏆 President</div>
-                        <div class="role-card-count">12 assigned · 22 orgs</div>
-                        <div class="role-card-perms">
-                            <span class="perm-tag">Full Access</span>
-                            <span class="perm-tag">Sign Documents</span>
-                            <span class="perm-tag">Manage Members</span>
-                        </div>
-                    </div>
-                    <div class="role-card">
-                        <div class="role-card-title">📋 Vice President</div>
-                        <div class="role-card-count">12 assigned · 22 orgs</div>
-                        <div class="role-card-perms">
-                            <span class="perm-tag">Full Access</span>
-                            <span class="perm-tag">Manage Members</span>
-                        </div>
-                    </div>
-                    <div class="role-card">
-                        <div class="role-card-title">💰 Treasurer</div>
-                        <div class="role-card-count">18 assigned · 22 orgs</div>
-                        <div class="role-card-perms">
-                            <span class="perm-tag">View Finance</span>
-                            <span class="perm-tag">Submit Reports</span>
-                        </div>
-                    </div>
-                    <div class="role-card">
-                        <div class="role-card-title">📝 Secretary</div>
-                        <div class="role-card-count">15 assigned · 22 orgs</div>
-                        <div class="role-card-perms">
-                            <span class="perm-tag">Record Minutes</span>
-                            <span class="perm-tag">Send Notices</span>
-                        </div>
-                    </div>
-                    <div class="role-card">
-                        <div class="role-card-title">👤 Member</div>
-                        <div class="role-card-count">520 assigned · 34 orgs</div>
-                        <div class="role-card-perms">
-                            <span class="perm-tag">View Only</span>
-                            <span class="perm-tag">Attend Events</span>
-                        </div>
-                    </div>
-                    <div class="role-card">
-                        <div class="role-card-title">🎯 Officer</div>
-                        <div class="role-card-count">64 assigned · 30 orgs</div>
-                        <div class="role-card-perms">
-                            <span class="perm-tag">Manage Events</span>
-                            <span class="perm-tag">View Reports</span>
-                        </div>
+                <!-- Role Distribution -->
+                <div class="card">
+                    <div class="card-header"><span class="card-title">Role Distribution</span></div>
+                    <div class="dist-body">
+                        <div class="dist-row"><div class="dist-name">President</div><div class="dist-track"><div class="dist-fill" style="width:90%;background:var(--crimson);"></div></div><div class="dist-count">34</div></div>
+                        <div class="dist-row"><div class="dist-name">Vice President</div><div class="dist-track"><div class="dist-fill" style="width:90%;background:#9B2D46;"></div></div><div class="dist-count">34</div></div>
+                        <div class="dist-row"><div class="dist-name">Secretary</div><div class="dist-track"><div class="dist-fill" style="width:90%;background:var(--gold);"></div></div><div class="dist-count">34</div></div>
+                        <div class="dist-row"><div class="dist-name">Treasurer</div><div class="dist-track"><div class="dist-fill" style="width:84%;background:#b87209;"></div></div><div class="dist-count">32</div></div>
+                        <div class="dist-row"><div class="dist-name">Auditor</div><div class="dist-track"><div class="dist-fill" style="width:73%;background:var(--crimson-light);"></div></div><div class="dist-count">28</div></div>
+                        <div class="dist-row"><div class="dist-name">PRO</div><div class="dist-track"><div class="dist-fill" style="width:79%;background:var(--crimson);"></div></div><div class="dist-count">30</div></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<div class="modal-overlay" id="addModal" onclick="if(event.target===this)closeModal()">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">Assign Role</div>
+            <div class="modal-close" onclick="closeModal()">✕</div>
+        </div>
+        <div class="fg"><label>Student</label>
+            <select><option>— Select Student —</option><option>Maria Santos</option><option>Juan dela Cruz</option><option>Ana Reyes</option><option>Rico Lim</option></select>
+        </div>
+        <div class="fg"><label>Organization</label>
+            <select><option>— Select Organization —</option><option>JPCS</option><option>ECES</option><option>CATS</option><option>NSAS</option></select>
+        </div>
+        <div class="fg"><label>Role</label>
+            <select><option>— Select Role —</option><option>President</option><option>Vice President</option><option>Secretary</option><option>Treasurer</option><option>Auditor</option><option>PRO</option></select>
+        </div>
+        <div class="fg"><label>Effective Date</label><input type="date"></div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="closeModal()">Assign Role</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function selectRole(el) {
+        document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+    }
+    function openModal()  { document.getElementById('addModal').classList.add('open'); }
+    function closeModal() { document.getElementById('addModal').classList.remove('open'); }
+</script>
 </body>
 </html>

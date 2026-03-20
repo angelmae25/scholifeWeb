@@ -1,3 +1,5 @@
+// FILE PATH: src/main/java/com/scholife1/service/AdminService.java
+
 package com.scholife1.service;
 
 import com.scholife1.model.Admin;
@@ -24,19 +26,16 @@ public class AdminService implements UserDetailsService {
     private PasswordEncoder passwordEncoder;
 
     @Override
-    public UserDetails loadUserByUsername(String email)
-            throws UsernameNotFoundException {
-
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Admin admin = adminRepository.findByEmail(email)
-                .orElseThrow(() ->
-                        new UsernameNotFoundException("Admin not found: " + email));
+                .orElseThrow(() -> new UsernameNotFoundException("Admin not found: " + email));
 
         return new User(
                 admin.getEmail(),
                 admin.getPassword(),
                 Collections.singletonList(
                         new SimpleGrantedAuthority("ROLE_" + admin.getRole().name())
-                )       //  ↑ .name() converts Enum to String
+                )
         );
     }
 
@@ -45,17 +44,12 @@ public class AdminService implements UserDetailsService {
             throw new RuntimeException("Email already exists.");
         }
         admin.setPassword(passwordEncoder.encode(admin.getPassword()));
-
-        // Set default role if null — using Enum, not String
         if (admin.getRole() == null) {
             admin.setRole(Admin.AdminRole.ADMIN);
         }
-
-        // Set default status — using Enum, not String
         if (admin.getStatus() == null) {
             admin.setStatus(Admin.Status.ACTIVE);
         }
-
         return adminRepository.save(admin);
     }
 

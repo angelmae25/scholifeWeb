@@ -1,10 +1,10 @@
+// FILE PATH: src/main/java/com/scholife1/model/Message.java
+
 package com.scholife1.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import java.time.LocalDateTime;
 
-@Data
 @Entity
 @Table(name = "messages")
 public class Message {
@@ -29,4 +29,20 @@ public class Message {
 
     @Column(name = "sent_at")
     private LocalDateTime sentAt = LocalDateTime.now();
+
+    // Getters
+    public Long getId()              { return id; }
+    public Admin getSender()         { return sender; }
+    public Admin getReceiver()       { return receiver; }
+    public String getBody()          { return body; }
+    public Boolean getIsRead()       { return isRead; }
+    public LocalDateTime getSentAt() { return sentAt; }
+
+    // Setters
+    public void setId(Long id)              { this.id = id; }
+    public void setSender(Admin sender)     { this.sender = sender; }
+    public void setReceiver(Admin receiver) { this.receiver = receiver; }
+    public void setBody(String body)        { this.body = body; }
+    public void setIsRead(Boolean isRead)   { this.isRead = isRead; }
+    public void setSentAt(LocalDateTime sentAt) { this.sentAt = sentAt; }
 }

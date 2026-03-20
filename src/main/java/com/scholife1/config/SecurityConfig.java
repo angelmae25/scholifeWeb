@@ -1,10 +1,16 @@
+// FILE PATH: src/main/java/com/scholife1/config/SecurityConfig.java
+
 package com.scholife1.config;
 
+import com.scholife1.service.AdminService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -12,41 +18,48 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    @Lazy
+    @Autowired
+    private AdminService adminService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Bean
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+        AuthenticationManagerBuilder builder =
+                http.getSharedObject(AuthenticationManagerBuilder.class);
+        builder.userDetailsService(adminService).passwordEncoder(passwordEncoder);
+        return builder.build();
+    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .authenticationManager(authenticationManager(http))
                 .authorizeHttpRequests(auth -> auth
-                        // Public routes — no login needed
                         .requestMatchers(
-                                "/auth/login",
-                                "/auth/register",
-                                "/css/**",
-                                "/js/**",
-                                "/images/**"
+                                "/auth/login", "/auth/register",
+                                "/css/**", "/js/**", "/images/**"
                         ).permitAll()
-                        // Everything else requires authentication
+                        .requestMatchers("/api/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/auth/login")
-                        .loginProcessingUrl("/auth/login")      // Spring Security handles POST here
+                        .loginProcessingUrl("/auth/login")
                         .defaultSuccessUrl("/dashboard/index", true)
                         .failureUrl("/auth/login?error")
+                        .usernameParameter("username")
+                        .passwordParameter("password")
                         .permitAll()
                 )
                 .logout(logout -> logout
-                        .logoutUrl("/auth/logout")              // Spring Security handles POST here
-                        .logoutSuccessUrl("/auth/login?logout") // redirect after logout
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
+                        .logoutUrl("/auth/logout")
+                        .logoutSuccessUrl("/auth/login?logout")
                         .permitAll()
-                );
-
+                )
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"));
         return http.build();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 }

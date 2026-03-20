@@ -5,41 +5,75 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SchoLife — Student Management</title>
     <link rel="stylesheet" th:href="@{/css/main.css}">
+    <!-- CSRF for JS HTTP methods -->
+    <meta name="_csrf"        th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <style>
+        .toolbar { display:flex; align-items:center; gap:0.8rem; margin-bottom:1.5rem; flex-wrap:wrap; }
+        .toolbar .search-bar { flex:2; min-width:220px; }
+
+        /* Modal */
+        .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:100; align-items:center; justify-content:center; }
+        .modal-overlay.open { display:flex; }
+        .modal { background:white; border-radius:16px; width:540px; max-width:95vw; padding:2rem; box-shadow:0 20px 60px rgba(0,0,0,0.18); }
+        .modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; }
+        .modal-title { font-size:1.15rem; font-weight:800; }
+        .modal-close { font-size:1.2rem; cursor:pointer; color:var(--text-light); padding:0.2rem 0.5rem; border-radius:6px; transition:background 0.12s; }
+        .modal-close:hover { background:var(--border-soft); }
+        .form-row { display:flex; gap:1rem; }
+        .form-row .fg { flex:1; }
+        .fg { margin-bottom:1rem; }
+        .fg label { display:block; font-size:0.68rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-mid); margin-bottom:0.42rem; }
+        .fg input, .fg select {
+            width:100%; padding:0.72rem 1rem;
+            border:1.5px solid var(--border);
+            border-radius:10px; font-family:inherit;
+            font-size:0.9rem; color:var(--text-dark);
+            background:#F9FAFB; outline:none;
+            transition:border-color 0.15s, box-shadow 0.15s;
+            box-sizing:border-box;
+        }
+        .fg input:focus, .fg select:focus { border-color:var(--crimson); box-shadow:0 0 0 3px rgba(123,28,53,0.08); }
+        .fg input.error, .fg select.error { border-color:#dc2626; box-shadow:0 0 0 3px rgba(220,38,38,0.08); }
+        .fg .field-error { font-size:0.72rem; color:#dc2626; margin-top:0.3rem; display:none; }
+        .fg.has-error .field-error { display:block; }
+        .modal-footer { display:flex; gap:0.8rem; justify-content:flex-end; margin-top:1.5rem; }
+        .btn-cancel { padding:0.65rem 1.2rem; border:1.5px solid var(--border); border-radius:9px; background:white; font-family:inherit; font-size:0.87rem; cursor:pointer; }
+        .btn-cancel:hover { background:#f3f4f6; }
+        .btn-submit { padding:0.65rem 1.4rem; background:var(--crimson); color:white; border:none; border-radius:9px; font-family:inherit; font-size:0.87rem; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:0.4rem; transition:background 0.15s; }
+        .btn-submit:hover { background:#6b1830; }
+        .btn-submit:disabled { opacity:0.6; cursor:not-allowed; }
+    </style>
 </head>
 <body>
 <div class="app">
-
     <aside class="sidebar">
         <div class="sidebar-logo">SchoLife</div>
         <div class="nav-section">Main</div>
         <a th:href="@{/dashboard/index}"         class="nav-item"><span class="nav-icon">🏠</span> Dashboard</a>
-        <a th:href="@{/dashboard/activity}"      class="nav-item"><span class="nav-icon">📋</span> Activity <span class="nav-badge">12</span></a>
+        <a th:href="@{/dashboard/activity}"      class="nav-item"><span class="nav-icon">📋</span> Activity</a>
         <div class="nav-section">Management</div>
         <a th:href="@{/dashboard/students}"      class="nav-item active"><span class="nav-icon">🎓</span> Student Management</a>
         <a th:href="@{/dashboard/organizations}" class="nav-item"><span class="nav-icon">🏛️</span> Organization Management</a>
         <a th:href="@{/dashboard/roles}"         class="nav-item"><span class="nav-icon">🔑</span> Role Assignment</a>
-        <div class="nav-section">Communication</div>
-        <a th:href="@{/dashboard/messages}"      class="nav-item"><span class="nav-icon">💬</span> Messages <span class="nav-badge">3</span></a>
         <div class="nav-section">System</div>
         <a th:href="@{/dashboard/admins}"        class="nav-item"><span class="nav-icon">⚙️</span> Admin Management</a>
         <div class="sidebar-footer">
-            <a th:href="@{/logout}" class="nav-logout" onclick="return confirm('Are you sure you want to logout?')">
-                <span class="nav-icon">🚪</span> Log out
-            </a>
+            <a th:href="@{/auth/logout}" class="nav-logout" onclick="return confirm('Are you sure you want to logout?')"><span class="nav-icon">🚪</span> Log out</a>
         </div>
     </aside>
 
     <div class="main">
         <div class="topbar">
             <div class="topbar-brand">SchoLife <small>Admin Portal</small></div>
-            <div class="topbar-search">
-                <span style="color:var(--text-light);">🔍</span>
-                <input type="text" placeholder="Search anything...">
-            </div>
+            <div class="topbar-search"><span style="color:var(--text-light);">🔍</span><input type="text" placeholder="Search anything..."></div>
             <div class="topbar-right">
                 <div class="icon-btn">🔔</div>
-                <div class="icon-btn">⊞</div>
-                <div class="user-pill"><div class="user-avatar">SA</div><span>Super Admin</span></div>
+                <div class="user-pill">
+                    <div class="user-avatar"
+                         th:text="${#strings.substring(loggedInAdmin.firstName,0,1) + #strings.substring(loggedInAdmin.lastName,0,1)}">SA</div>
+                    <span th:text="${loggedInAdmin.firstName + ' ' + loggedInAdmin.lastName}">Super Admin</span>
+                </div>
             </div>
         </div>
 
@@ -47,52 +81,260 @@
             <div class="page-header fu d0">
                 <div class="ph-left">
                     <h1>Student Management</h1>
-                    <p>Manage enrolled students and their records.</p>
+                    <p>Add, edit, or manage enrolled students</p>
                 </div>
-                <button class="btn btn-primary">+ Add Student</button>
+                <button class="btn btn-primary" onclick="openModal()">+ Add Student</button>
             </div>
 
             <div class="toolbar fu d1">
-                <div class="search-bar" style="flex:1;max-width:360px;">
+                <div class="search-bar">
                     <span class="si">🔍</span>
-                    <input type="text" placeholder="Search by name or ID...">
+                    <input type="text" placeholder="Search students by name, ID, or program..." oninput="searchStudents(this.value)">
                 </div>
-                <select class="inline-select">
-                    <option>All Colleges</option><option>Engineering</option><option>Business</option>
-                    <option>Education</option><option>Arts &amp; Sciences</option><option>Nursing</option>
+                <select class="inline-select" onchange="filterStudents()">
+                    <option value="">All Programs</option>
+                    <option>BS Information Technology</option>
+                    <option>BS Computer Science</option>
+                    <option>BS Business Administration</option>
+                    <option>BS Nursing</option>
+                    <option>BS Education</option>
                 </select>
-                <div class="filter-tabs">
-                    <div class="ftab active" onclick="setTab(this)">All</div>
-                    <div class="ftab" onclick="setTab(this)">Active</div>
-                    <div class="ftab" onclick="setTab(this)">Pending</div>
-                    <div class="ftab" onclick="setTab(this)">Inactive</div>
-                </div>
+                <select class="inline-select" onchange="filterStudents()">
+                    <option value="">All Years</option>
+                    <option>1st Year</option>
+                    <option>2nd Year</option>
+                    <option>3rd Year</option>
+                    <option>4th Year</option>
+                </select>
             </div>
 
             <div class="card fu d2">
-                <table class="data-table">
+                <div class="card-header">
+                    <span class="card-title">All Students
+                        <span style="font-weight:400;color:var(--text-light);font-size:0.83rem;"
+                              th:text="${totalStudents + ' records'}">0 records</span>
+                    </span>
+                    <button class="btn btn-outline">📄 Export CSV</button>
+                </div>
+                <table class="data-table" id="studentsTable">
                     <thead>
-                    <tr><th>Student ID</th><th>Name</th><th>College</th><th>Program</th><th>Year</th><th>Status</th><th>Actions</th></tr>
+                    <tr>
+                        <th>Student</th>
+                        <th>Student ID</th>
+                        <th>Program</th>
+                        <th>Year</th>
+                        <th>Organization</th>
+                        <th>Actions</th>
+                    </tr>
                     </thead>
                     <tbody>
-                    <tr><td>2024-0001</td><td><div class="user-cell"><div class="av av-sm" style="background:var(--crimson);">MS</div><div><div class="uc-name">Maria Santos</div><div class="uc-sub">maria.santos@edu.ph</div></div></div></td><td>Engineering</td><td>BSIT</td><td>2nd</td><td><span class="status s-active">Active</span></td><td><div class="tbl-actions"><button class="btn btn-outline btn-sm">View</button><button class="btn btn-outline btn-sm">Edit</button></div></td></tr>
-                    <tr><td>2024-0002</td><td><div class="user-cell"><div class="av av-sm" style="background:var(--blue);">JC</div><div><div class="uc-name">Juan dela Cruz</div><div class="uc-sub">juan.delacruz@edu.ph</div></div></div></td><td>Business</td><td>BSBA</td><td>3rd</td><td><span class="status s-active">Active</span></td><td><div class="tbl-actions"><button class="btn btn-outline btn-sm">View</button><button class="btn btn-outline btn-sm">Edit</button></div></td></tr>
-                    <tr><td>2023-0049</td><td><div class="user-cell"><div class="av av-sm" style="background:var(--gold);">RL</div><div><div class="uc-name">Rico Lim</div><div class="uc-sub">rico.lim@edu.ph</div></div></div></td><td>Engineering</td><td>BSCE</td><td>4th</td><td><span class="status s-pending">Pending</span></td><td><div class="tbl-actions"><button class="btn btn-outline btn-sm">View</button><button class="btn btn-outline btn-sm">Edit</button></div></td></tr>
-                    <tr><td>2024-0015</td><td><div class="user-cell"><div class="av av-sm" style="background:var(--green);">AR</div><div><div class="uc-name">Ana Reyes</div><div class="uc-sub">ana.reyes@edu.ph</div></div></div></td><td>Nursing</td><td>BSN</td><td>1st</td><td><span class="status s-active">Active</span></td><td><div class="tbl-actions"><button class="btn btn-outline btn-sm">View</button><button class="btn btn-outline btn-sm">Edit</button></div></td></tr>
-                    <tr><td>2022-0077</td><td><div class="user-cell"><div class="av av-sm" style="background:#6B7280;">CM</div><div><div class="uc-name">Carlo Mendoza</div><div class="uc-sub">carlo.mendoza@edu.ph</div></div></div></td><td>Arts &amp; Sciences</td><td>BSPS</td><td>4th</td><td><span class="status s-inactive">Inactive</span></td><td><div class="tbl-actions"><button class="btn btn-outline btn-sm">View</button><button class="btn btn-outline btn-sm">Edit</button></div></td></tr>
-                    <tr><td>2024-0031</td><td><div class="user-cell"><div class="av av-sm" style="background:#8B5CF6;">LF</div><div><div class="uc-name">Liza Flores</div><div class="uc-sub">liza.flores@edu.ph</div></div></div></td><td>Education</td><td>BEED</td><td>2nd</td><td><span class="status s-active">Active</span></td><td><div class="tbl-actions"><button class="btn btn-outline btn-sm">View</button><button class="btn btn-outline btn-sm">Edit</button></div></td></tr>
-                    <tr><td>2023-0088</td><td><div class="user-cell"><div class="av av-sm" style="background:#EC4899;">MT</div><div><div class="uc-name">Mark Tan</div><div class="uc-sub">mark.tan@edu.ph</div></div></div></td><td>Business</td><td>BSAC</td><td>3rd</td><td><span class="status s-pending">Pending</span></td><td><div class="tbl-actions"><button class="btn btn-outline btn-sm">View</button><button class="btn btn-outline btn-sm">Edit</button></div></td></tr>
-                    <tr><td>2024-0042</td><td><div class="user-cell"><div class="av av-sm" style="background:#0891B2;">JR</div><div><div class="uc-name">Joy Ramos</div><div class="uc-sub">joy.ramos@edu.ph</div></div></div></td><td>Engineering</td><td>BSEE</td><td>1st</td><td><span class="status s-active">Active</span></td><td><div class="tbl-actions"><button class="btn btn-outline btn-sm">View</button><button class="btn btn-outline btn-sm">Edit</button></div></td></tr>
+                    <tr th:each="student : ${students}">
+                        <td>
+                            <div style="display:flex;align-items:center;gap:0.75rem;">
+                                <div class="user-avatar" style="width:34px;height:34px;font-size:0.78rem;"
+                                     th:text="${#strings.substring(student.firstName,0,1) + #strings.substring(student.lastName,0,1)}">AB</div>
+                                <div>
+                                    <div style="font-weight:600;font-size:0.9rem;" th:text="${student.firstName + ' ' + student.lastName}">Name</div>
+                                    <div style="font-size:0.78rem;color:var(--text-light);" th:text="${student.email}">email</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td th:text="${student.studentId}">—</td>
+                        <td th:text="${student.program}">—</td>
+                        <td th:text="${student.yearLevel}">—</td>
+                        <td th:text="${student.organizationName != null ? student.organizationName : '—'}">—</td>
+                        <td>
+                            <div style="display:flex;gap:0.4rem;">
+                                <button class="btn btn-outline btn-sm"
+                                        th:onclick="'editStudent(' + ${student.id} + ')'">Edit</button>
+                                <button class="btn btn-sm"
+                                        style="background:#fee2e2;color:#dc2626;border:none;"
+                                        th:onclick="'deleteStudent(' + ${student.id} + ')'">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${students == null or students.isEmpty()}">
+                        <td colspan="6" style="text-align:center;padding:2.5rem;color:var(--text-light);font-size:0.88rem;">
+                            No students found.
+                        </td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 </div>
+
+<!-- ADD STUDENT MODAL -->
+<div class="modal-overlay" id="addModal" onclick="if(event.target===this) closeModal()">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">➕ Add New Student</div>
+            <div class="modal-close" onclick="closeModal()">✕</div>
+        </div>
+
+        <!-- Name row -->
+        <div class="form-row">
+            <div class="fg" id="fg-firstName">
+                <label for="firstName">First Name</label>
+                <input type="text" id="firstName" placeholder="e.g. Maria" oninput="clearError('firstName')">
+                <div class="field-error">First name is required.</div>
+            </div>
+            <div class="fg" id="fg-lastName">
+                <label for="lastName">Last Name</label>
+                <input type="text" id="lastName" placeholder="e.g. Santos" oninput="clearError('lastName')">
+                <div class="field-error">Last name is required.</div>
+            </div>
+        </div>
+
+        <!-- Student ID -->
+        <div class="fg" id="fg-studentId">
+            <label for="studentId">Student ID</label>
+            <input type="text" id="studentId" placeholder="e.g. 2024-00999" oninput="clearError('studentId')">
+            <div class="field-error">Student ID is required (e.g. 2024-00999).</div>
+        </div>
+
+        <!-- Email -->
+        <div class="fg" id="fg-email">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" placeholder="student@school.edu" oninput="clearError('email')">
+            <div class="field-error">A valid email address is required.</div>
+        </div>
+
+        <!-- Program & Year -->
+        <div class="form-row">
+            <div class="fg" id="fg-program">
+                <label for="program">Program</label>
+                <select id="program" onchange="clearError('program')">
+                    <option value="">— Select Program —</option>
+                    <option value="BS_INFORMATION_TECHNOLOGY">BS Information Technology</option>
+                    <option value="BS_COMPUTER_SCIENCE">BS Computer Science</option>
+                    <option value="BS_BUSINESS_ADMINISTRATION">BS Business Administration</option>
+                    <option value="BS_NURSING">BS Nursing</option>
+                    <option value="BS_EDUCATION">BS Education</option>
+                </select>
+                <div class="field-error">Please select a program.</div>
+            </div>
+            <div class="fg" id="fg-yearLevel">
+                <label for="yearLevel">Year Level</label>
+                <select id="yearLevel">
+                    <option value="1ST_YEAR">1st Year</option>
+                    <option value="2ND_YEAR">2nd Year</option>
+                    <option value="3RD_YEAR">3rd Year</option>
+                    <option value="4TH_YEAR">4th Year</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+            <button class="btn-submit" id="submitBtn" onclick="submitAddStudent()">
+                ➕ Add Student
+            </button>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/main.js}"></script>
 <script>
-    function setTab(el) {
-        el.closest('.filter-tabs').querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
-        el.classList.add('active');
+    /* ── Modal open / close ── */
+    function openModal() {
+        resetForm();
+        document.getElementById('addModal').classList.add('open');
+        document.getElementById('firstName').focus();
+    }
+
+    function closeModal() {
+        document.getElementById('addModal').classList.remove('open');
+        resetForm();
+    }
+
+    function resetForm() {
+        ['firstName','lastName','studentId','email','program','yearLevel'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.value = (el.tagName === 'SELECT') ? el.options[0].value : '';
+                el.classList.remove('error');
+            }
+            clearError(id);
+        });
+    }
+
+    /* ── Validation helpers ── */
+    function setError(fieldId, msg) {
+        const fg = document.getElementById('fg-' + fieldId);
+        const input = document.getElementById(fieldId);
+        if (!fg || !input) return;
+        fg.classList.add('has-error');
+        input.classList.add('error');
+        if (msg) fg.querySelector('.field-error').textContent = msg;
+    }
+
+    function clearError(fieldId) {
+        const fg = document.getElementById('fg-' + fieldId);
+        const input = document.getElementById(fieldId);
+        if (!fg || !input) return;
+        fg.classList.remove('has-error');
+        input.classList.remove('error');
+    }
+
+    function validateForm() {
+        let valid = true;
+        const firstName = document.getElementById('firstName').value.trim();
+        const lastName  = document.getElementById('lastName').value.trim();
+        const studentId = document.getElementById('studentId').value.trim();
+        const email     = document.getElementById('email').value.trim();
+        const program   = document.getElementById('program').value;
+
+        if (!firstName) { setError('firstName', 'First name is required.'); valid = false; }
+        if (!lastName)  { setError('lastName',  'Last name is required.');  valid = false; }
+        if (!studentId) {
+            setError('studentId', 'Student ID is required (e.g. 2024-00999).');
+            valid = false;
+        }
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            setError('email', 'A valid email address is required.');
+            valid = false;
+        }
+        if (!program) { setError('program', 'Please select a program.'); valid = false; }
+
+        return valid;
+    }
+
+    /* ── Submit handler — wire your API call here ── */
+    async function submitAddStudent() {
+        if (!validateForm()) return;
+
+        const student = {
+            firstName : document.getElementById('firstName').value.trim(),
+            lastName  : document.getElementById('lastName').value.trim(),
+            studentId : document.getElementById('studentId').value.trim(),
+            email     : document.getElementById('email').value.trim(),
+            program   : document.getElementById('program').value,
+            yearLevel : document.getElementById('yearLevel').value,
+        };
+
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.textContent = 'Saving…';
+
+        try {
+            // TODO: replace the block below with your actual API call
+            // e.g. const result = await StudentAPI.create(student);
+            // if (result.success) { closeModal(); location.reload(); }
+            console.log('Student payload ready:', student);
+
+            // Placeholder success feedback until API is connected:
+            showToast('Student added successfully!', 'success');
+            closeModal();
+            // location.reload(); // uncomment once API is wired
+        } catch (err) {
+            showToast('Failed to add student. Please try again.', 'error');
+            console.error(err);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '➕ Add Student';
+        }
     }
 </script>
 </body>

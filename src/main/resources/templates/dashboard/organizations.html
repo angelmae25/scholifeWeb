@@ -5,6 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SchoLife — Organization Management</title>
     <link rel="stylesheet" th:href="@{/css/main.css}">
+    <meta name="_csrf"        th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <style>
+        /* ── Modal ── */
+        .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:100; align-items:center; justify-content:center; }
+        .modal-overlay.open { display:flex; }
+        .modal { background:white; border-radius:16px; width:560px; max-width:95vw; padding:2rem; box-shadow:0 20px 60px rgba(0,0,0,0.18); max-height:90vh; overflow-y:auto; }
+        .modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; }
+        .modal-title { font-size:1.15rem; font-weight:800; }
+        .modal-close { font-size:1.2rem; cursor:pointer; color:var(--text-light); padding:0.2rem 0.5rem; border-radius:6px; transition:background 0.12s; }
+        .modal-close:hover { background:var(--border-soft); }
+        .form-row { display:flex; gap:1rem; }
+        .form-row .fg { flex:1; }
+        .fg { margin-bottom:1rem; }
+        .fg label { display:block; font-size:0.68rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-mid); margin-bottom:0.42rem; }
+        .fg input, .fg select, .fg textarea {
+            width:100%; padding:0.72rem 1rem;
+            border:1.5px solid var(--border); border-radius:10px;
+            font-family:inherit; font-size:0.9rem; color:var(--text-dark);
+            background:#F9FAFB; outline:none;
+            transition:border-color 0.15s, box-shadow 0.15s;
+            box-sizing:border-box;
+        }
+        .fg textarea { resize:vertical; min-height:80px; }
+        .fg input:focus, .fg select:focus, .fg textarea:focus { border-color:var(--crimson); box-shadow:0 0 0 3px rgba(123,28,53,0.08); }
+        .fg input.error, .fg select.error { border-color:#dc2626; box-shadow:0 0 0 3px rgba(220,38,38,0.08); }
+        .fg .field-error { font-size:0.72rem; color:#dc2626; margin-top:0.3rem; display:none; }
+        .fg.has-error .field-error { display:block; }
+        .modal-footer { display:flex; gap:0.8rem; justify-content:flex-end; margin-top:1.5rem; }
+        .btn-cancel { padding:0.65rem 1.2rem; border:1.5px solid var(--border); border-radius:9px; background:white; font-family:inherit; font-size:0.87rem; cursor:pointer; }
+        .btn-cancel:hover { background:#f3f4f6; }
+        .btn-submit { padding:0.65rem 1.4rem; background:var(--crimson); color:white; border:none; border-radius:9px; font-family:inherit; font-size:0.87rem; font-weight:600; cursor:pointer; transition:background 0.15s; }
+        .btn-submit:hover { background:#6b1830; }
+        .btn-submit:disabled { opacity:0.6; cursor:not-allowed; }
+
+        /* ── Empty state ── */
+        .empty-state { padding:3rem; text-align:center; color:var(--text-light); font-size:0.88rem; }
+    </style>
 </head>
 <body>
 <div class="app">
@@ -13,17 +51,15 @@
         <div class="sidebar-logo">SchoLife</div>
         <div class="nav-section">Main</div>
         <a th:href="@{/dashboard/index}"         class="nav-item"><span class="nav-icon">🏠</span> Dashboard</a>
-        <a th:href="@{/dashboard/activity}"      class="nav-item"><span class="nav-icon">📋</span> Activity <span class="nav-badge">12</span></a>
+        <a th:href="@{/dashboard/activity}"      class="nav-item"><span class="nav-icon">📋</span> Activity</a>
         <div class="nav-section">Management</div>
         <a th:href="@{/dashboard/students}"      class="nav-item"><span class="nav-icon">🎓</span> Student Management</a>
         <a th:href="@{/dashboard/organizations}" class="nav-item active"><span class="nav-icon">🏛️</span> Organization Management</a>
         <a th:href="@{/dashboard/roles}"         class="nav-item"><span class="nav-icon">🔑</span> Role Assignment</a>
-        <div class="nav-section">Communication</div>
-        <a th:href="@{/dashboard/messages}"      class="nav-item"><span class="nav-icon">💬</span> Messages <span class="nav-badge">3</span></a>
         <div class="nav-section">System</div>
         <a th:href="@{/dashboard/admins}"        class="nav-item"><span class="nav-icon">⚙️</span> Admin Management</a>
         <div class="sidebar-footer">
-            <a th:href="@{/logout}" class="nav-logout" onclick="return confirm('Are you sure you want to logout?')">
+            <a th:href="@{/auth/logout}" class="nav-logout" onclick="return confirm('Are you sure you want to logout?')">
                 <span class="nav-icon">🚪</span> Log out
             </a>
         </div>
@@ -38,8 +74,11 @@
             </div>
             <div class="topbar-right">
                 <div class="icon-btn">🔔</div>
-                <div class="icon-btn">⊞</div>
-                <div class="user-pill"><div class="user-avatar">SA</div><span>Super Admin</span></div>
+                <div class="user-pill">
+                    <div class="user-avatar"
+                         th:text="${#strings.substring(loggedInAdmin.firstName,0,1) + #strings.substring(loggedInAdmin.lastName,0,1)}">SA</div>
+                    <span th:text="${loggedInAdmin.firstName + ' ' + loggedInAdmin.lastName}">Super Admin</span>
+                </div>
             </div>
         </div>
 
@@ -49,46 +88,405 @@
                     <h1>Organization Management</h1>
                     <p>Manage student organizations and memberships.</p>
                 </div>
-                <button class="btn btn-primary">+ New Organization</button>
+                <button class="btn btn-primary" onclick="openModal()">+ New Organization</button>
             </div>
 
             <div class="toolbar fu d1">
                 <div class="search-bar" style="flex:1;max-width:360px;">
                     <span class="si">🔍</span>
-                    <input type="text" placeholder="Search organizations...">
+                    <input type="text" id="searchInput" placeholder="Search organizations..." oninput="handleSearch()">
                 </div>
-                <select class="inline-select">
-                    <option>All Types</option><option>Academic</option><option>Cultural</option><option>Sports</option><option>Service</option>
+                <select class="inline-select" id="typeFilter" onchange="handleSearch()">
+                    <option value="">All Types</option>
+                    <option value="Academic">Academic</option>
+                    <option value="Cultural">Cultural</option>
+                    <option value="Sports">Sports</option>
+                    <option value="Service">Service</option>
                 </select>
                 <div class="filter-tabs">
-                    <div class="ftab active" onclick="setTab(this)">All</div>
-                    <div class="ftab" onclick="setTab(this)">Active</div>
-                    <div class="ftab" onclick="setTab(this)">Pending</div>
+                    <div class="ftab active" onclick="setTab(this,'')">All</div>
+                    <div class="ftab" onclick="setTab(this,'ACTIVE')">Active</div>
+                    <div class="ftab" onclick="setTab(this,'INACTIVE')">Inactive</div>
                 </div>
             </div>
 
             <div class="card fu d2">
+                <div class="card-header">
+                    <span class="card-title">All Organizations
+                        <span id="orgCount" style="font-weight:400;color:var(--text-light);font-size:0.83rem;"
+                              th:text="'(' + ${totalOrganizations} + ' records)'"></span>
+                    </span>
+                </div>
                 <table class="data-table">
                     <thead>
-                    <tr><th>Org ID</th><th>Organization</th><th>Type</th><th>Members</th><th>Adviser</th><th>Status</th><th>Actions</th></tr>
+                    <tr>
+                        <th>Organization</th>
+                        <th>Type</th>
+                        <th>Members</th>
+                        <th>Adviser</th>
+                        <th>Year Founded</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
                     </thead>
-                    <tbody>
-                    <tr><td>ORG-001</td><td><div class="user-cell"><div class="av av-sm" style="background:var(--crimson);">JP</div><div><div class="uc-name">JPCS</div><div class="uc-sub">Junior Phil. Computer Society</div></div></div></td><td><span class="badge b-blue">Academic</span></td><td><strong>128</strong></td><td>Prof. Santos</td><td><span class="status s-active">Active</span></td><td><div class="tbl-actions"><button class="btn btn-outline btn-sm">View</button><button class="btn btn-outline btn-sm">Edit</button></div></td></tr>
-                    <tr><td>ORG-002</td><td><div class="user-cell"><div class="av av-sm" style="background:var(--blue);">DC</div><div><div class="uc-name">Debate Club</div><div class="uc-sub">Academic Organization</div></div></div></td><td><span class="badge b-blue">Academic</span></td><td><strong>42</strong></td><td>Prof. dela Rosa</td><td><span class="status s-active">Active</span></td><td><div class="tbl-actions"><button class="btn btn-outline btn-sm">View</button><button class="btn btn-outline btn-sm">Edit</button></div></td></tr>
-                    <tr><td>ORG-003</td><td><div class="user-cell"><div class="av av-sm" style="background:#8B5CF6;">PG</div><div><div class="uc-name">Photography Guild</div><div class="uc-sub">Cultural Organization</div></div></div></td><td><span class="badge b-gold">Cultural</span></td><td><strong>31</strong></td><td>Prof. Lim</td><td><span class="status s-active">Active</span></td><td><div class="tbl-actions"><button class="btn btn-outline btn-sm">View</button><button class="btn btn-outline btn-sm">Edit</button></div></td></tr>
-                    <tr><td>ORG-004</td><td><div class="user-cell"><div class="av av-sm" style="background:var(--red);">RC</div><div><div class="uc-name">Red Cross Youth</div><div class="uc-sub">Service Organization</div></div></div></td><td><span class="badge b-green">Service</span></td><td><strong>87</strong></td><td>Dr. Reyes</td><td><span class="status s-active">Active</span></td><td><div class="tbl-actions"><button class="btn btn-outline btn-sm">View</button><button class="btn btn-outline btn-sm">Edit</button></div></td></tr>
-                    <tr><td>ORG-005</td><td><div class="user-cell"><div class="av av-sm" style="background:var(--green);">BV</div><div><div class="uc-name">Basketball Varsity</div><div class="uc-sub">Sports Organization</div></div></div></td><td><span class="badge b-gray">Sports</span></td><td><strong>22</strong></td><td>Coach Bautista</td><td><span class="status s-pending">Pending</span></td><td><div class="tbl-actions"><button class="btn btn-outline btn-sm">View</button><button class="btn btn-outline btn-sm">Edit</button></div></td></tr>
-                    <tr><td>ORG-006</td><td><div class="user-cell"><div class="av av-sm" style="background:var(--gold);">ES</div><div><div class="uc-name">Engineering Society</div><div class="uc-sub">Academic Organization</div></div></div></td><td><span class="badge b-blue">Academic</span></td><td><strong>210</strong></td><td>Prof. Cruz</td><td><span class="status s-active">Active</span></td><td><div class="tbl-actions"><button class="btn btn-outline btn-sm">View</button><button class="btn btn-outline btn-sm">Edit</button></div></td></tr>
+                    <tbody id="orgTableBody">
+                    <!-- Thymeleaf initial render -->
+                    <tr th:each="org : ${organizations}" th:attr="data-status=${org.status}">
+                        <td>
+                            <div class="user-cell">
+                                <div class="av av-sm"
+                                     th:style="'background:var(--crimson);'"
+                                     th:text="${org.acronym != null ? org.acronym : #strings.substring(org.name,0,2).toUpperCase()}">
+                                    ORG
+                                </div>
+                                <div>
+                                    <div class="uc-name" th:text="${org.name}">Name</div>
+                                    <div class="uc-sub"  th:text="${org.acronym}">Acronym</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge"
+                                  th:classappend="${org.type == 'Academic'  ? 'b-blue'   :
+                                                   org.type == 'Cultural'  ? 'b-gold'   :
+                                                   org.type == 'Sports'    ? 'b-gray'   :
+                                                   org.type == 'Service'   ? 'b-green'  : 'b-gray'}"
+                                  th:text="${org.type}">Type</span>
+                        </td>
+                        <td><strong>—</strong></td>
+                        <td th:text="${org.adviser != null ? org.adviser : '—'}">—</td>
+                        <td th:text="${org.yearFounded != null ? org.yearFounded : '—'}">—</td>
+                        <td>
+                            <span class="status"
+                                  th:classappend="${org.status.name() == 'ACTIVE' ? 's-active' : 's-inactive'}"
+                                  th:text="${org.status.name() == 'ACTIVE' ? 'Active' : 'Inactive'}">
+                                Active
+                            </span>
+                        </td>
+                        <td>
+                            <div class="tbl-actions">
+                                <button class="btn btn-outline btn-sm">View</button>
+                                <button class="btn btn-outline btn-sm">Edit</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${organizations == null or organizations.isEmpty()}" id="emptyRow">
+                        <td colspan="7" class="empty-state">No organizations found.</td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 </div>
+
+<!-- ADD ORGANIZATION MODAL -->
+<div class="modal-overlay" id="addModal" onclick="if(event.target===this) closeModal()">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">🏛️ New Organization</div>
+            <div class="modal-close" onclick="closeModal()">✕</div>
+        </div>
+
+        <!-- Name & Acronym -->
+        <div class="form-row">
+            <div class="fg" id="fg-name" style="flex:2;">
+                <label for="orgName">Organization Name *</label>
+                <input type="text" id="orgName" placeholder="e.g. Junior Phil. Computer Society" oninput="clearError('name')">
+                <div class="field-error">Organization name is required.</div>
+            </div>
+            <div class="fg" id="fg-acronym">
+                <label for="orgAcronym">Acronym</label>
+                <input type="text" id="orgAcronym" placeholder="e.g. JPCS" style="text-transform:uppercase;">
+            </div>
+        </div>
+
+        <!-- Type & Adviser -->
+        <div class="form-row">
+            <div class="fg" id="fg-type">
+                <label for="orgType">Type *</label>
+                <select id="orgType" onchange="clearError('type')">
+                    <option value="">— Select Type —</option>
+                    <option value="Academic">Academic</option>
+                    <option value="Cultural">Cultural</option>
+                    <option value="Sports">Sports</option>
+                    <option value="Service">Service</option>
+                </select>
+                <div class="field-error">Please select an organization type.</div>
+            </div>
+            <div class="fg">
+                <label for="orgAdviser">Adviser</label>
+                <input type="text" id="orgAdviser" placeholder="e.g. Prof. Santos">
+            </div>
+        </div>
+
+        <!-- Year Founded -->
+        <div class="fg">
+            <label for="orgYearFounded">Year Founded</label>
+            <input type="number" id="orgYearFounded" placeholder="e.g. 2005" min="1900" th:max="${#dates.year(#dates.createNow())}">
+        </div>
+
+        <!-- Description -->
+        <div class="fg">
+            <label for="orgDescription">Description</label>
+            <textarea id="orgDescription" placeholder="Brief description of the organization..."></textarea>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+            <button class="btn-submit" id="orgSubmitBtn" onclick="submitNewOrganization()">
+                🏛️ Create Organization
+            </button>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/main.js}"></script>
 <script>
-    function setTab(el) {
+    const CSRF_TOKEN  = document.querySelector('meta[name="_csrf"]').content;
+    const CSRF_HEADER = document.querySelector('meta[name="_csrf_header"]').content;
+
+    let activeStatusFilter = '';
+
+    /* ══════════════════════════════════
+       MODAL
+    ══════════════════════════════════ */
+    function openModal() {
+        resetOrgForm();
+        document.getElementById('addModal').classList.add('open');
+        document.getElementById('orgName').focus();
+    }
+
+    function closeModal() {
+        document.getElementById('addModal').classList.remove('open');
+        resetOrgForm();
+    }
+
+    function resetOrgForm() {
+        ['orgName','orgAcronym','orgAdviser','orgYearFounded','orgDescription'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) { el.value = ''; el.classList.remove('error'); }
+        });
+        document.getElementById('orgType').value = '';
+        clearError('name');
+        clearError('type');
+    }
+
+    /* ══════════════════════════════════
+       VALIDATION HELPERS
+    ══════════════════════════════════ */
+    function setError(fieldId, msg) {
+        const fg    = document.getElementById('fg-' + fieldId);
+        const input = document.getElementById('org' + fieldId.charAt(0).toUpperCase() + fieldId.slice(1));
+        if (!fg) return;
+        fg.classList.add('has-error');
+        if (input) input.classList.add('error');
+        if (msg) { const e = fg.querySelector('.field-error'); if (e) e.textContent = msg; }
+    }
+
+    function clearError(fieldId) {
+        const fg    = document.getElementById('fg-' + fieldId);
+        const input = document.getElementById('org' + fieldId.charAt(0).toUpperCase() + fieldId.slice(1));
+        if (!fg) return;
+        fg.classList.remove('has-error');
+        if (input) input.classList.remove('error');
+    }
+
+    function validateOrgForm() {
+        let valid = true;
+        if (!document.getElementById('orgName').value.trim()) {
+            setError('name', 'Organization name is required.'); valid = false;
+        }
+        if (!document.getElementById('orgType').value) {
+            setError('type', 'Please select an organization type.'); valid = false;
+        }
+        return valid;
+    }
+
+    /* ══════════════════════════════════
+       SUBMIT
+    ══════════════════════════════════ */
+    async function submitNewOrganization() {
+        if (!validateOrgForm()) return;
+
+        const payload = {
+            name:        document.getElementById('orgName').value.trim(),
+            acronym:     document.getElementById('orgAcronym').value.trim().toUpperCase() || null,
+            type:        document.getElementById('orgType').value,
+            adviser:     document.getElementById('orgAdviser').value.trim() || null,
+            yearFounded: document.getElementById('orgYearFounded').value || null,
+            description: document.getElementById('orgDescription').value.trim() || null,
+            status:      'ACTIVE'
+        };
+
+        const btn = document.getElementById('orgSubmitBtn');
+        btn.disabled    = true;
+        btn.textContent = 'Saving…';
+
+        try {
+            const res  = await fetch('/dashboard/organizations', {
+                method:  'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [CSRF_HEADER]: CSRF_TOKEN
+                },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+
+            if (!res.ok) {
+                showToast(data.error || 'Failed to create organization.', 'error');
+            } else {
+                showToast('Organization created successfully!', 'success');
+                closeModal();
+                appendOrgRow(data);           // add row without full reload
+                updateOrgCount(1);
+            }
+        } catch (err) {
+            showToast('Network error. Please try again.', 'error');
+            console.error(err);
+        } finally {
+            btn.disabled    = false;
+            btn.textContent = '🏛️ Create Organization';
+        }
+    }
+
+    /* ══════════════════════════════════
+       OPTIMISTIC ROW APPEND
+    ══════════════════════════════════ */
+    const TYPE_BADGE = { Academic:'b-blue', Cultural:'b-gold', Sports:'b-gray', Service:'b-green' };
+
+    function appendOrgRow(org) {
+        const tbody   = document.getElementById('orgTableBody');
+        const empty   = document.getElementById('emptyRow');
+        if (empty) empty.remove();
+
+        const initials = org.acronym
+            ? org.acronym.substring(0,2)
+            : org.name.substring(0,2).toUpperCase();
+
+        const badgeClass = TYPE_BADGE[org.type] || 'b-gray';
+
+        const tr = document.createElement('tr');
+        tr.setAttribute('data-status', org.status || 'ACTIVE');
+        tr.innerHTML = `
+            <td>
+                <div class="user-cell">
+                    <div class="av av-sm" style="background:var(--crimson);">${initials}</div>
+                    <div>
+                        <div class="uc-name">${org.name}</div>
+                        <div class="uc-sub">${org.acronym || ''}</div>
+                    </div>
+                </div>
+            </td>
+            <td><span class="badge ${badgeClass}">${org.type || '—'}</span></td>
+            <td><strong>0</strong></td>
+            <td>${org.adviser || '—'}</td>
+            <td>${org.yearFounded || '—'}</td>
+            <td><span class="status s-active">Active</span></td>
+            <td>
+                <div class="tbl-actions">
+                    <button class="btn btn-outline btn-sm">View</button>
+                    <button class="btn btn-outline btn-sm">Edit</button>
+                </div>
+            </td>`;
+        tbody.appendChild(tr);
+    }
+
+    function updateOrgCount(delta) {
+        const el   = document.getElementById('orgCount');
+        const match = el.textContent.match(/\d+/);
+        const cur   = match ? parseInt(match[0]) : 0;
+        el.textContent = `(${cur + delta} records)`;
+    }
+
+    /* ══════════════════════════════════
+       SEARCH + FILTER (live, debounced)
+    ══════════════════════════════════ */
+    let searchTimer = null;
+
+    function handleSearch() {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(doSearch, 280);
+    }
+
+    async function doSearch() {
+        const q    = document.getElementById('searchInput').value.trim();
+        const type = document.getElementById('typeFilter').value;
+
+        try {
+            const res  = await fetch(`/dashboard/organizations/search?q=${encodeURIComponent(q)}&type=${encodeURIComponent(type)}`);
+            const data = await res.json();
+            renderSearchResults(data);
+        } catch (err) {
+            console.error('Search failed:', err);
+        }
+    }
+
+    function renderSearchResults(orgs) {
+        const tbody = document.getElementById('orgTableBody');
+        tbody.innerHTML = '';
+
+        if (!orgs.length) {
+            tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No organizations found.</td></tr>';
+            document.getElementById('orgCount').textContent = '(0 records)';
+            return;
+        }
+
+        document.getElementById('orgCount').textContent = `(${orgs.length} records)`;
+
+        orgs.forEach(org => {
+            // respect status tab filter client-side
+            if (activeStatusFilter && org.status !== activeStatusFilter) return;
+            appendOrgRowToBody(tbody, org);
+        });
+    }
+
+    function appendOrgRowToBody(tbody, org) {
+        const initials   = org.acronym ? org.acronym.substring(0,2) : org.name.substring(0,2).toUpperCase();
+        const badgeClass = TYPE_BADGE[org.type] || 'b-gray';
+        const isActive   = (org.status === 'ACTIVE');
+
+        const tr = document.createElement('tr');
+        tr.setAttribute('data-status', org.status);
+        tr.innerHTML = `
+            <td>
+                <div class="user-cell">
+                    <div class="av av-sm" style="background:var(--crimson);">${initials}</div>
+                    <div>
+                        <div class="uc-name">${org.name}</div>
+                        <div class="uc-sub">${org.acronym || ''}</div>
+                    </div>
+                </div>
+            </td>
+            <td><span class="badge ${badgeClass}">${org.type || '—'}</span></td>
+            <td><strong>—</strong></td>
+            <td>${org.adviser || '—'}</td>
+            <td>${org.yearFounded || '—'}</td>
+            <td><span class="status ${isActive ? 's-active' : 's-inactive'}">${isActive ? 'Active' : 'Inactive'}</span></td>
+            <td>
+                <div class="tbl-actions">
+                    <button class="btn btn-outline btn-sm">View</button>
+                    <button class="btn btn-outline btn-sm">Edit</button>
+                </div>
+            </td>`;
+        tbody.appendChild(tr);
+    }
+
+    /* ══════════════════════════════════
+       STATUS TABS (client-side filter)
+    ══════════════════════════════════ */
+    function setTab(el, status) {
         el.closest('.filter-tabs').querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
         el.classList.add('active');
+        activeStatusFilter = status;
+
+        // Re-filter existing rows
+        const rows = document.querySelectorAll('#orgTableBody tr[data-status]');
+        rows.forEach(row => {
+            const s = row.getAttribute('data-status');
+            row.style.display = (!status || s === status) ? '' : 'none';
+        });
     }
 </script>
 </body>

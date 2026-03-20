@@ -1,3 +1,5 @@
+// FILE PATH: src/main/java/com/scholife1/controller/AuthController.java
+
 package com.scholife1.controller;
 
 import com.scholife1.model.Admin;
@@ -14,32 +16,26 @@ public class AuthController {
     @Autowired
     private AdminService adminService;
 
-    // ── GET /auth/login ──────────────────────────────────────
     @GetMapping("/login")
     public String loginPage() {
-        return "auth/login";       // → templates/auth/login.html
+        return "auth/login";
     }
 
-    // ── GET /auth/register ───────────────────────────────────
     @GetMapping("/register")
     public String registerPage(Model model) {
         model.addAttribute("admin", new Admin());
-        return "auth/register";    // → templates/auth/register.html
+        return "auth/register";
     }
 
-    // ── POST /auth/register ──────────────────────────────────
     @PostMapping("/register")
     public String register(@ModelAttribute Admin admin, Model model) {
         try {
             adminService.register(admin);
             return "redirect:/auth/login?registered";
         } catch (Exception e) {
-            model.addAttribute("error", "Email already exists.");
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("admin", admin);
             return "auth/register";
         }
     }
-
-    // NOTE: No logout method needed here.
-    // Spring Security intercepts POST /auth/logout automatically
-    // via SecurityConfig → logout().logoutUrl("/auth/logout")
 }
