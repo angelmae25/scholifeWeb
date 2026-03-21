@@ -6,7 +6,9 @@ import com.scholife1.model.Organization;
 import com.scholife1.repository.OrganizationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class OrganizationService {
@@ -18,18 +20,26 @@ public class OrganizationService {
         return organizationRepository.findAll();
     }
 
-    // ✅ ADD THIS
     public Organization saveOrganization(Organization org) {
         return organizationRepository.save(org);
     }
 
-    // ✅ ADD THIS (used by search endpoint in your HTML)
-    public List<Organization> searchOrganizations(String q, String type) {
-        return organizationRepository.findAll().stream()
-                .filter(o -> q == null || q.isBlank() ||
-                        o.getName().toLowerCase().contains(q.toLowerCase()) ||
-                        (o.getAcronym() != null && o.getAcronym().toLowerCase().contains(q.toLowerCase())))
-                .filter(o -> type == null || type.isBlank() || type.equals(o.getType()))
-                .toList();
+    public void deleteOrganization(Long id) {
+        organizationRepository.deleteById(id);
+    }
+
+    public List<Organization> searchOrganizations(String query, String type) {
+        List<Organization> all = organizationRepository.findAll();
+
+        return all.stream()
+                .filter(o -> {
+                    boolean matchQ = query == null || query.isBlank()
+                            || o.getName().toLowerCase().contains(query.toLowerCase())
+                            || (o.getAcronym() != null && o.getAcronym().toLowerCase().contains(query.toLowerCase()));
+                    boolean matchT = type == null || type.isBlank()
+                            || (o.getType() != null && o.getType().equalsIgnoreCase(type));
+                    return matchQ && matchT;
+                })
+                .collect(Collectors.toList());
     }
 }

@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SchoLife — Role Assignment</title>
     <link rel="stylesheet" th:href="@{/css/main.css}">
-
     <meta name="_csrf"        th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <style>
@@ -17,59 +16,84 @@
             border-radius: 12px; padding: 1.2rem;
             cursor: pointer; transition: all 0.16s;
         }
-        .role-card:hover { border-color: var(--crimson-border); background: var(--crimson-muted); transform: translateY(-1px); }
-        .role-card.selected { border-color: var(--crimson); background: var(--crimson-muted); }
-        .rc-name { font-weight: 800; font-size: 0.97rem; margin-bottom: 0.4rem; color: var(--text-dark); }
-        .rc-desc { font-size: 0.78rem; color: var(--text-light); line-height: 1.5; margin-bottom: 0.7rem; }
-        .rc-count { font-size: 0.78rem; font-weight: 700; color: var(--crimson); }
+        .role-card:hover  { border-color:var(--crimson); background:var(--crimson-muted); transform:translateY(-1px); }
+        .role-card.selected { border-color:var(--crimson); background:var(--crimson-muted); }
+        .rc-name  { font-weight:800; font-size:0.97rem; margin-bottom:0.4rem; color:var(--text-dark); }
+        .rc-desc  { font-size:0.78rem; color:var(--text-light); line-height:1.5; margin-bottom:0.7rem; }
+        .rc-count { font-size:0.78rem; font-weight:700; color:var(--crimson); }
 
-        .dist-body { padding: 1.2rem 1.5rem; }
-        .dist-row { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.9rem; }
-        .dist-name { width: 100px; text-align: right; font-size: 0.83rem; color: var(--text-mid); flex-shrink: 0; }
-        .dist-track { flex: 1; height: 10px; background: #EEEFF1; border-radius: 99px; overflow: hidden; }
-        .dist-fill  { height: 100%; border-radius: 99px; transition: width 0.6s ease; }
-        .dist-count { font-size: 0.83rem; font-weight: 700; width: 26px; text-align: right; }
+        .dist-body { padding:1.2rem 1.5rem; }
+        .dist-row  { display:flex; align-items:center; gap:0.8rem; margin-bottom:0.9rem; }
+        .dist-name { width:110px; text-align:right; font-size:0.83rem; color:var(--text-mid); flex-shrink:0; }
+        .dist-track { flex:1; height:10px; background:#EEEFF1; border-radius:99px; overflow:hidden; }
+        .dist-fill  { height:100%; border-radius:99px; transition:width 0.6s ease; }
+        .dist-count { font-size:0.83rem; font-weight:700; width:30px; text-align:right; }
+
+        /* Assignments table */
+        .assign-section { margin-top:1.2rem; }
 
         /* Modal */
         .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:100; align-items:center; justify-content:center; }
         .modal-overlay.open { display:flex; }
         .modal { background:white; border-radius:16px; width:480px; max-width:95vw; padding:2rem; box-shadow:0 20px 60px rgba(0,0,0,0.18); }
         .modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; }
-        .modal-title { font-size:1.1rem; font-weight:800; }
-        .modal-close { cursor:pointer; color:var(--text-light); padding:0.2rem 0.5rem; border-radius:6px; }
+        .modal-title  { font-size:1.1rem; font-weight:800; }
+        .modal-close  { cursor:pointer; color:var(--text-light); padding:0.2rem 0.5rem; border-radius:6px; }
         .modal-close:hover { background:var(--border-soft); }
         .fg { margin-bottom:1rem; }
         .fg label { display:block; font-size:0.68rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-mid); margin-bottom:0.42rem; }
-        .fg input, .fg select { width:100%; padding:0.72rem 1rem; border:1.5px solid var(--border); border-radius:10px; font-family:inherit; font-size:0.9rem; color:var(--text-dark); background:#F9FAFB; outline:none; transition:border-color 0.15s; }
-        .fg input:focus, .fg select:focus { border-color:var(--crimson); }
+        .fg select, .fg input { width:100%; padding:0.72rem 1rem; border:1.5px solid var(--border); border-radius:10px; font-family:inherit; font-size:0.9rem; color:var(--text-dark); background:#F9FAFB; outline:none; transition:border-color 0.15s; box-sizing:border-box; }
+        .fg select:focus, .fg input:focus { border-color:var(--crimson); }
         .modal-footer { display:flex; gap:0.8rem; justify-content:flex-end; margin-top:1.5rem; }
+
+        /* Toast */
+        .toast { position:fixed; bottom:2rem; right:2rem; padding:0.85rem 1.4rem; border-radius:10px; font-weight:600; font-size:0.88rem; z-index:999; opacity:0; transform:translateY(10px); transition:all 0.25s; pointer-events:none; }
+        .toast.show { opacity:1; transform:none; }
+        .toast.success { background:#065f46; color:white; }
+        .toast.error   { background:#dc2626; color:white; }
+
+        /* action buttons */
+        .act-btn  { padding:0.28rem 0.65rem; border-radius:6px; font-size:0.74rem; font-weight:600; border:none; cursor:pointer; font-family:inherit; }
+        .act-del  { background:#fee2e2; color:#dc2626; }
+        .act-del:hover { background:#fecaca; }
     </style>
 </head>
 <body>
 <div class="app">
+
+    <!-- SIDEBAR -->
     <aside class="sidebar">
         <div class="sidebar-logo">SchoLife</div>
         <div class="nav-section">Main</div>
         <a th:href="@{/dashboard/index}"         class="nav-item"><span class="nav-icon">🏠</span> Dashboard</a>
-        <a th:href="@{/dashboard/activity}"      class="nav-item"><span class="nav-icon">📋</span> Activity <span class="nav-badge">12</span></a>
+        <a th:href="@{/dashboard/activity}"      class="nav-item"><span class="nav-icon">📋</span> Activity</a>
         <div class="nav-section">Management</div>
         <a th:href="@{/dashboard/students}"      class="nav-item"><span class="nav-icon">🎓</span> Student Management</a>
         <a th:href="@{/dashboard/organizations}" class="nav-item"><span class="nav-icon">🏛️</span> Organization Management</a>
         <a th:href="@{/dashboard/roles}"         class="nav-item active"><span class="nav-icon">🔑</span> Role Assignment</a>
         <div class="nav-section">Communication</div>
-        <a th:href="@{/dashboard/messages}"      class="nav-item"><span class="nav-icon">💬</span> Messages <span class="nav-badge">3</span></a>
+        <a th:href="@{/dashboard/messages}"      class="nav-item"><span class="nav-icon">💬</span> Messages</a>
         <div class="nav-section">System</div>
         <a th:href="@{/dashboard/admins}"        class="nav-item"><span class="nav-icon">⚙️</span> Admin Management</a>
-        <div class="sidebar-footer"><a th:href="@{/auth/logout}" class="nav-logout" onclick="return confirm('Are you sure you want to logout?')"><span>🚪</span> Log out</a></div>
+        <div class="sidebar-footer">
+            <a th:href="@{/auth/logout}" class="nav-logout" onclick="return confirm('Are you sure you want to logout?')">
+                <span>🚪</span> Log out
+            </a>
+        </div>
     </aside>
 
+    <!-- MAIN -->
     <div class="main">
         <div class="topbar">
             <div class="topbar-brand">SchoLife <small>Admin Portal</small></div>
             <div class="topbar-search"><span>🔍</span><input type="text" placeholder="Search anything..."></div>
             <div class="topbar-right">
-                <div class="icon-btn">🔔</div><div class="icon-btn">⊞</div>
-                <div class="user-pill"><div class="user-avatar">SA</div><span>Super Admin</span></div>
+                <div class="icon-btn">🔔</div>
+                <div class="user-pill">
+                    <div class="user-avatar"
+                         th:text="${#strings.substring(loggedInAdmin.firstName,0,1) + #strings.substring(loggedInAdmin.lastName,0,1)}">SA</div>
+                    <span th:text="${loggedInAdmin.firstName + ' ' + loggedInAdmin.lastName}">Admin</span>
+                </div>
             </div>
         </div>
 
@@ -83,39 +107,20 @@
             </div>
 
             <div class="roles-layout fu d1">
-                <!-- Available Roles -->
+
+                <!-- Available Roles from DB -->
                 <div class="card">
                     <div class="card-header"><span class="card-title">Available Roles</span></div>
                     <div class="role-grid">
-                        <div class="role-card selected" onclick="selectRole(this)">
-                            <div class="rc-name">President</div>
-                            <div class="rc-desc">Leads the organization and represents it in all activities.</div>
-                            <div class="rc-count">34 assigned</div>
-                        </div>
-                        <div class="role-card" onclick="selectRole(this)">
-                            <div class="rc-name">Vice President</div>
-                            <div class="rc-desc">Assists the president and oversees committees.</div>
-                            <div class="rc-count">34 assigned</div>
-                        </div>
-                        <div class="role-card" onclick="selectRole(this)">
-                            <div class="rc-name">Secretary</div>
-                            <div class="rc-desc">Handles minutes, records and correspondence.</div>
-                            <div class="rc-count">34 assigned</div>
-                        </div>
-                        <div class="role-card" onclick="selectRole(this)">
-                            <div class="rc-name">Treasurer</div>
-                            <div class="rc-desc">Manages financial records and budgeting.</div>
-                            <div class="rc-count">32 assigned</div>
-                        </div>
-                        <div class="role-card" onclick="selectRole(this)">
-                            <div class="rc-name">Auditor</div>
-                            <div class="rc-desc">Reviews and verifies financial transactions.</div>
-                            <div class="rc-count">28 assigned</div>
-                        </div>
-                        <div class="role-card" onclick="selectRole(this)">
-                            <div class="rc-name">PRO</div>
-                            <div class="rc-desc">Manages public relations and promotions.</div>
-                            <div class="rc-count">30 assigned</div>
+                        <div th:each="r, rStat : ${roles}"
+                             class="role-card"
+                             th:classappend="${rStat.first} ? ' selected'"
+                             onclick="selectRoleCard(this)"
+                             th:data-role-id="${r.id}"
+                             th:data-role-name="${r.roleName}">
+                            <div class="rc-name" th:text="${r.roleName}">Role</div>
+                            <div class="rc-desc">Assigned to organization members.</div>
+                            <div class="rc-count" th:text="${roleAssignmentCounts.get(r.id) != null ? roleAssignmentCounts.get(r.id) + ' assigned' : '0 assigned'}">0 assigned</div>
                         </div>
                     </div>
                 </div>
@@ -124,23 +129,76 @@
                 <div class="card">
                     <div class="card-header"><span class="card-title">Role Distribution</span></div>
                     <div class="dist-body">
-                        <div class="dist-row"><div class="dist-name">President</div><div class="dist-track"><div class="dist-fill" style="width:90%;background:var(--crimson);"></div></div><div class="dist-count">34</div></div>
-                        <div class="dist-row"><div class="dist-name">Vice President</div><div class="dist-track"><div class="dist-fill" style="width:90%;background:#9B2D46;"></div></div><div class="dist-count">34</div></div>
-                        <div class="dist-row"><div class="dist-name">Secretary</div><div class="dist-track"><div class="dist-fill" style="width:90%;background:var(--gold);"></div></div><div class="dist-count">34</div></div>
-                        <div class="dist-row"><div class="dist-name">Treasurer</div><div class="dist-track"><div class="dist-fill" style="width:84%;background:#b87209;"></div></div><div class="dist-count">32</div></div>
-                        <div class="dist-row"><div class="dist-name">Auditor</div><div class="dist-track"><div class="dist-fill" style="width:73%;background:var(--crimson-light);"></div></div><div class="dist-count">28</div></div>
-                        <div class="dist-row"><div class="dist-name">PRO</div><div class="dist-track"><div class="dist-fill" style="width:79%;background:var(--crimson);"></div></div><div class="dist-count">30</div></div>
+                        <div th:each="r : ${roles}" class="dist-row">
+                            <div class="dist-name" th:text="${r.roleName}">Role</div>
+                            <div class="dist-track">
+                                <div class="dist-fill"
+                                     style="background:var(--crimson);"
+                                     th:style="'width:' + ${totalAssignments > 0 ? ((roleAssignmentCounts.get(r.id) != null ? roleAssignmentCounts.get(r.id) : 0) * 100 / totalAssignments) : 0} + '%;background:var(--crimson);'">
+                                </div>
+                            </div>
+                            <div class="dist-count"
+                                 th:text="${roleAssignmentCounts.get(r.id) != null ? roleAssignmentCounts.get(r.id) : 0}">0</div>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Recent Assignments Table -->
+            <div class="card assign-section fu d2">
+                <div class="card-header">
+                    <span class="card-title">Recent Role Assignments</span>
+                </div>
+                <table class="data-table" id="assignmentsTable">
+                    <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Organization</th>
+                        <th>Role</th>
+                        <th>Effective Date</th>
+                        <th>Assigned By</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="ra : ${recentAssignments}">
+                        <td>
+                            <div class="user-cell">
+                                <div class="av av-sm" style="background:var(--crimson);"
+                                     th:text="${#strings.substring(ra.student.firstName,0,1) + #strings.substring(ra.student.lastName,0,1)}">ST</div>
+                                <div class="uc-name" th:text="${ra.student.firstName + ' ' + ra.student.lastName}">Name</div>
+                            </div>
+                        </td>
+                        <td th:text="${ra.organization.name}">Org</td>
+                        <td>
+                            <span class="badge b-crimson" th:text="${ra.role.roleName}">Role</span>
+                        </td>
+                        <td th:text="${ra.effectiveDate != null ? ra.effectiveDate : '—'}">—</td>
+                        <td th:text="${ra.assignedBy != null ? ra.assignedBy.firstName + ' ' + ra.assignedBy.lastName : 'System'}">Admin</td>
+                        <td>
+                            <button class="act-btn act-del"
+                                    th:data-id="${ra.id}"
+                                    onclick="deleteAssignment(this)">Remove</button>
+                        </td>
+                    </tr>
+                    <tr th:if="${recentAssignments == null or recentAssignments.isEmpty()}">
+                        <td colspan="6" style="text-align:center;padding:2rem;color:var(--text-light);">
+                            No role assignments yet.
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
         </div>
     </div>
 </div>
 
+<!-- ASSIGN ROLE MODAL -->
 <div class="modal-overlay" id="addModal" onclick="if(event.target===this)closeModal()">
     <div class="modal">
         <div class="modal-header">
-            <div class="modal-title">Assign Role</div>
+            <div class="modal-title">🔑 Assign Role</div>
             <div class="modal-close" onclick="closeModal()">✕</div>
         </div>
 
@@ -150,7 +208,7 @@
                 <option value="">— Select Student —</option>
                 <option th:each="s : ${students}"
                         th:value="${s.id}"
-                        th:text="${s.firstName + ' ' + s.lastName}">
+                        th:text="${s.firstName + ' ' + s.lastName + ' (' + s.studentId + ')'}">
                 </option>
             </select>
         </div>
@@ -168,7 +226,8 @@
 
         <div class="fg">
             <label>Role</label>
-            <select id="selectRole">
+            <!-- ID is selectRoleDropdown to avoid conflict with selectRole() function -->
+            <select id="selectRoleDropdown">
                 <option value="">— Select Role —</option>
                 <option th:each="r : ${roles}"
                         th:value="${r.id}"
@@ -182,56 +241,117 @@
             <input type="date" id="effectiveDate">
         </div>
 
+        <div id="modalError" style="color:#dc2626;font-size:0.82rem;margin-top:0.4rem;display:none;"></div>
+
         <div class="modal-footer">
             <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
-            <button class="btn btn-primary" onclick="submitAssignment()">Assign Role</button>
+            <button class="btn btn-primary" id="assignBtn" onclick="submitAssignment()">Assign Role</button>
         </div>
     </div>
 </div>
-<script>
-    const CSRF_TOKEN  = document.querySelector('meta[name="_csrf"]').content;
-    const CSRF_HEADER = document.querySelector('meta[name="_csrf_header"]').content;
 
-    function selectRole(el) {
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<script>
+    const CSRF_TOKEN  = document.querySelector('meta[name="_csrf"]')?.content        || '';
+    const CSRF_HEADER = document.querySelector('meta[name="_csrf_header"]')?.content || 'X-CSRF-TOKEN';
+
+    // ── Highlight selected role card ──────────────────────────────────────────
+    function selectRoleCard(el) {
         document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
         el.classList.add('selected');
+        // Auto-select matching role in the modal dropdown
+        const roleName = el.dataset.roleName;
+        const roleId   = el.dataset.roleId;
+        const dropdown = document.getElementById('selectRoleDropdown');
+        for (const opt of dropdown.options) {
+            if (opt.value === roleId) { opt.selected = true; break; }
+        }
     }
-    function openModal()  { document.getElementById('addModal').classList.add('open'); }
-    function closeModal() { document.getElementById('addModal').classList.remove('open'); }
 
+    // ── Modal ─────────────────────────────────────────────────────────────────
+    function openModal() {
+        document.getElementById('modalError').style.display = 'none';
+        document.getElementById('addModal').classList.add('open');
+    }
+    function closeModal() {
+        document.getElementById('addModal').classList.remove('open');
+    }
+
+    // ── Toast helper ──────────────────────────────────────────────────────────
+    function showToast(msg, type = 'success') {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className   = `toast ${type} show`;
+        setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    // ── SUBMIT → POST /dashboard/roles/assign ─────────────────────────────────
     async function submitAssignment() {
+        const err            = document.getElementById('modalError');
+        const btn            = document.getElementById('assignBtn');
         const studentId      = document.getElementById('selectStudent').value;
         const organizationId = document.getElementById('selectOrganization').value;
         const roleId         = document.getElementById('selectRoleDropdown').value;
         const effectiveDate  = document.getElementById('effectiveDate').value;
 
+        // Validate
         if (!studentId || !organizationId || !roleId) {
-            alert('Please fill in Student, Organization, and Role.');
+            err.textContent   = 'Please select a Student, Organization, and Role.';
+            err.style.display = 'block';
             return;
         }
+
+        btn.disabled    = true;
+        btn.textContent = 'Saving…';
+        err.style.display = 'none';
 
         try {
             const res = await fetch('/dashboard/roles/assign', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    [CSRF_HEADER]: CSRF_TOKEN
+                    [CSRF_HEADER]:  CSRF_TOKEN,
                 },
-                body: JSON.stringify({ studentId, organizationId, roleId, effectiveDate })
+                body: JSON.stringify({ studentId, organizationId, roleId, effectiveDate }),
             });
+
+            const data = await res.json();
+
             if (res.ok) {
                 closeModal();
-                location.reload();
+                showToast('✅ Role assigned successfully!', 'success');
+                // Reload after short delay so toast is visible
+                setTimeout(() => location.reload(), 1200);
             } else {
-                const data = await res.json();
-                alert(data.error || 'Failed to assign role.');
+                err.textContent   = data.error || 'Failed to assign role.';
+                err.style.display = 'block';
             }
-        } catch (err) {
-            alert('Network error. Please try again.');
+        } catch (e) {
+            err.textContent   = 'Network error. Is Spring Boot running?';
+            err.style.display = 'block';
+        } finally {
+            btn.disabled    = false;
+            btn.textContent = 'Assign Role';
+        }
+    }
+
+    // ── DELETE assignment ─────────────────────────────────────────────────────
+    async function deleteAssignment(btn) {
+        if (!confirm('Remove this role assignment?')) return;
+        const id  = btn.dataset.id;
+        const res = await fetch(`/dashboard/roles/assignments/${id}`, {
+            method:  'DELETE',
+            headers: { [CSRF_HEADER]: CSRF_TOKEN },
+        });
+        if (res.ok) {
+            btn.closest('tr').remove();
+            showToast('Role assignment removed.', 'success');
+        } else {
+            showToast('Failed to remove assignment.', 'error');
         }
     }
 </script>
-</body>
-</html>
 </body>
 </html>
