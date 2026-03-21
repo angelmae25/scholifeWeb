@@ -17,4 +17,19 @@ public class OrganizationService {
     public List<Organization> getAllOrganizations() {
         return organizationRepository.findAll();
     }
+
+    // ✅ ADD THIS
+    public Organization saveOrganization(Organization org) {
+        return organizationRepository.save(org);
+    }
+
+    // ✅ ADD THIS (used by search endpoint in your HTML)
+    public List<Organization> searchOrganizations(String q, String type) {
+        return organizationRepository.findAll().stream()
+                .filter(o -> q == null || q.isBlank() ||
+                        o.getName().toLowerCase().contains(q.toLowerCase()) ||
+                        (o.getAcronym() != null && o.getAcronym().toLowerCase().contains(q.toLowerCase())))
+                .filter(o -> type == null || type.isBlank() || type.equals(o.getType()))
+                .toList();
+    }
 }

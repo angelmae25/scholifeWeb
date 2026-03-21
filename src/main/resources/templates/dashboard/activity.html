@@ -16,7 +16,7 @@
         <div class="sidebar-logo">SchoLife</div>
         <div class="nav-section">Main</div>
         <a th:href="@{/dashboard/index}"         class="nav-item"><span class="nav-icon">🏠</span> Dashboard</a>
-        <a th:href="@{/dashboard/activity}"      class="nav-item active"><span class="nav-icon">📋</span> Activity <span class="nav-badge">12</span></a>
+        <a th:href="@{/dashboard/activity}"      class="nav-item active"><span class="nav-icon">📋</span> Activity</a>
         <div class="nav-section">Management</div>
         <a th:href="@{/dashboard/students}"      class="nav-item"><span class="nav-icon">🎓</span> Student Management</a>
         <a th:href="@{/dashboard/organizations}" class="nav-item"><span class="nav-icon">🏛️</span> Organization Management</a>
@@ -25,7 +25,11 @@
         <a th:href="@{/dashboard/messages}"      class="nav-item"><span class="nav-icon">💬</span> Messages <span class="nav-badge">3</span></a>
         <div class="nav-section">System</div>
         <a th:href="@{/dashboard/admins}"        class="nav-item"><span class="nav-icon">⚙️</span> Admin Management</a>
-        <div class="sidebar-footer"><a th:href="@{/auth/logout}" class="nav-logout" onclick="return confirm('Are you sure you want to logout?')"><span>🚪</span> Log out</a></div>
+        <div class="sidebar-footer">
+            <a th:href="@{/auth/logout}" class="nav-logout" onclick="return confirm('Are you sure you want to logout?')">
+                <span>🚪</span> Log out
+            </a>
+        </div>
     </aside>
 
     <div class="main">
@@ -34,7 +38,11 @@
             <div class="topbar-search"><span>🔍</span><input type="text" placeholder="Search anything..."></div>
             <div class="topbar-right">
                 <div class="icon-btn">🔔</div><div class="icon-btn">⊞</div>
-                <div class="user-pill"><div class="user-avatar">SA</div><span>Super Admin</span></div>
+                <div class="user-pill">
+                    <div class="user-avatar"
+                         th:text="${#strings.substring(loggedInAdmin.firstName,0,1) + #strings.substring(loggedInAdmin.lastName,0,1)}">SA</div>
+                    <span th:text="${loggedInAdmin.firstName + ' ' + loggedInAdmin.lastName}">Super Admin</span>
+                </div>
             </div>
         </div>
 
@@ -46,13 +54,14 @@
                 </div>
             </div>
 
+            <!-- Filter Tabs -->
             <div class="toolbar fu d1">
                 <div class="filter-tabs">
                     <button class="ftab active" onclick="filterTab(this,'all')">All</button>
-                    <button class="ftab" onclick="filterTab(this,'students')">Students</button>
-                    <button class="ftab" onclick="filterTab(this,'organizations')">Organizations</button>
-                    <button class="ftab" onclick="filterTab(this,'roles')">Roles</button>
-                    <button class="ftab" onclick="filterTab(this,'system')">System</button>
+                    <button class="ftab" onclick="filterTab(this,'STUDENTS')">Students</button>
+                    <button class="ftab" onclick="filterTab(this,'ORGANIZATIONS')">Organizations</button>
+                    <button class="ftab" onclick="filterTab(this,'ROLES')">Roles</button>
+                    <button class="ftab" onclick="filterTab(this,'SYSTEM')">System</button>
                 </div>
             </div>
 
@@ -73,76 +82,54 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr data-cat="students">
-                        <td>Student enrolled</td>
-                        <td><div class="user-cell"><div class="av av-sm" style="background:#7B1C35;">MS</div><div><div class="uc-name">Maria Santos</div><div class="uc-sub">2024-00124</div></div></div></td>
-                        <td><span class="badge b-crimson">● Students</span></td>
-                        <td style="font-family:monospace;font-size:0.82rem;">192.168.1.101</td>
-                        <td>2 min ago</td>
-                        <td><span class="status s-active">Success</span></td>
+                    <!-- Real data from DB -->
+                    <tr th:each="log : ${activityLogs}"
+                        th:attr="data-cat=${log.category}">
+
+                        <td th:text="${log.event}">Event</td>
+
+                        <td>
+                            <div class="user-cell">
+                                <div class="av av-sm"
+                                     style="background:#7B1C35;"
+                                     th:text="${log.admin != null ?
+                                         #strings.substring(log.admin.firstName,0,1) + #strings.substring(log.admin.lastName,0,1)
+                                         : '?'}">SA</div>
+                                <div>
+                                    <div class="uc-name" th:text="${log.entity != null ? log.entity : (log.admin != null ? log.admin.firstName + ' ' + log.admin.lastName : 'System')}">Entity</div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td>
+                            <span th:switch="${log.category?.name()}">
+                                <span th:case="'STUDENTS'"      class="badge b-crimson">● Students</span>
+                                <span th:case="'ORGANIZATIONS'" class="badge b-gold">● Organizations</span>
+                                <span th:case="'ROLES'"         class="badge b-blue">● Roles</span>
+                                <span th:case="'MESSAGES'"      class="badge b-blue">● Messages</span>
+                                <span th:case="*"               class="badge b-gray">● System</span>
+                            </span>
+                        </td>
+
+                        <td style="font-family:monospace;font-size:0.82rem;"
+                            th:text="${log.ipAddress != null ? log.ipAddress : '—'}">—</td>
+
+                        <td th:text="${#temporals.format(log.createdAt, 'MMM d, yyyy HH:mm')}">—</td>
+
+                        <td>
+                            <span th:switch="${log.status?.name()}">
+                                <span th:case="'SUCCESS'" class="status s-active">Success</span>
+                                <span th:case="'FAILED'"  class="status s-inactive">Failed</span>
+                                <span th:case="*"         class="status s-pending">Pending</span>
+                            </span>
+                        </td>
                     </tr>
-                    <tr data-cat="organizations">
-                        <td>Organization updated</td>
-                        <td><div class="user-cell"><div class="av av-sm" style="background:#C9930A;">JP</div><div><div class="uc-name">JPCS (org_042)</div></div></div></td>
-                        <td><span class="badge b-gold">● Organizations</span></td>
-                        <td style="font-family:monospace;font-size:0.82rem;">192.168.1.55</td>
-                        <td>18 min ago</td>
-                        <td><span class="status s-active">Success</span></td>
-                    </tr>
-                    <tr data-cat="roles">
-                        <td>Role assigned</td>
-                        <td><div class="user-cell"><div class="av av-sm" style="background:#5C1427;">JD</div><div><div class="uc-name">Juan dela Cruz → Treasurer</div></div></div></td>
-                        <td><span class="badge b-blue">● Roles</span></td>
-                        <td style="font-family:monospace;font-size:0.82rem;">192.168.1.22</td>
-                        <td>1 hr ago</td>
-                        <td><span class="status s-active">Success</span></td>
-                    </tr>
-                    <tr data-cat="system">
-                        <td>Admin login</td>
-                        <td><span class="badge b-gray">● System</span></td>
-                        <td style="font-family:monospace;font-size:0.82rem;">192.168.1.1</td>
-                        <td>2 hr ago</td>
-                        <td><span class="status s-active">Success</span></td>
-                    </tr>
-                    <tr data-cat="students">
-                        <td>Student status changed</td>
-                        <td><div class="user-cell"><div class="av av-sm" style="background:#9B2D46;">RL</div><div><div class="uc-name">Rico Lim (2021-00233)</div></div></div></td>
-                        <td><span class="badge b-crimson">● Students</span></td>
-                        <td style="font-family:monospace;font-size:0.82rem;">192.168.1.101</td>
-                        <td>3 hr ago</td>
-                        <td><span class="status s-pending">Pending</span></td>
-                    </tr>
-                    <tr data-cat="organizations">
-                        <td>New org created</td>
-                        <td><div class="user-cell"><div class="av av-sm" style="background:#C9930A;">RA</div><div><div class="uc-name">Robotics Club (org_051)</div></div></div></td>
-                        <td><span class="badge b-gold">● Organizations</span></td>
-                        <td style="font-family:monospace;font-size:0.82rem;">192.168.1.55</td>
-                        <td>5 hr ago</td>
-                        <td><span class="status s-active">Success</span></td>
-                    </tr>
-                    <tr data-cat="system">
-                        <td>Admin account created</td>
-                        <td><div class="user-cell"><div class="av av-sm" style="background:#9B2D46;">LR</div><div><div class="uc-name">Liza Reyes (admin_009)</div></div></div></td>
-                        <td><span class="badge b-gray">● System</span></td>
-                        <td style="font-family:monospace;font-size:0.82rem;">192.168.1.1</td>
-                        <td>6 hr ago</td>
-                        <td><span class="status s-active">Success</span></td>
-                    </tr>
-                    <tr data-cat="students">
-                        <td>Student record updated</td>
-                        <td><div class="user-cell"><div class="av av-sm" style="background:#5C1427;">AR</div><div><div class="uc-name">Ana Reyes (2022-00456)</div></div></div></td>
-                        <td><span class="badge b-crimson">● Students</span></td>
-                        <td style="font-family:monospace;font-size:0.82rem;">192.168.1.101</td>
-                        <td>8 hr ago</td>
-                        <td><span class="status s-active">Success</span></td>
-                    </tr>
-                    <tr data-cat="roles">
-                        <td>Role removed</td>
-                        <td><div class="user-cell"><div class="av av-sm" style="background:#7B1C35;">SG</div><div><div class="uc-name">Sofia Garcia → Secretary</div></div></div></td>
-                        <td><span class="badge b-blue">● Roles</span></td>
-                        <td style="font-family:monospace;font-size:0.82rem;">192.168.1.22</td>
-                        <td>1 day ago</td>
-                        <td><span class="status s-inactive">Failed</span></td>
+
+                    <!-- Empty state -->
+                    <tr th:if="${#lists.isEmpty(activityLogs)}">
+                        <td colspan="6" style="text-align:center;color:var(--text-light);padding:2rem;">
+                            No activity logs yet.
+                        </td>
                     </tr>
                     </tbody>
                 </table>
@@ -151,5 +138,15 @@
     </div>
 </div>
 
-function filterTab(el, cat) {
-document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+<script>
+    function filterTab(el, cat) {
+        document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        document.querySelectorAll('#activityTable tbody tr').forEach(row => {
+            const rowCat = row.getAttribute('data-cat');
+            row.style.display = (cat === 'all' || rowCat === cat) ? '' : 'none';
+        });
+    }
+</script>
+</body>
+</html>

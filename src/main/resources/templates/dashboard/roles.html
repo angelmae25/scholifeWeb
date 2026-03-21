@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SchoLife — Role Assignment</title>
     <link rel="stylesheet" th:href="@{/css/main.css}">
+
+    <meta name="_csrf"        th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <style>
         .roles-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
         .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; padding: 1.2rem; }
@@ -140,30 +143,95 @@
             <div class="modal-title">Assign Role</div>
             <div class="modal-close" onclick="closeModal()">✕</div>
         </div>
-        <div class="fg"><label>Student</label>
-            <select><option>— Select Student —</option><option>Maria Santos</option><option>Juan dela Cruz</option><option>Ana Reyes</option><option>Rico Lim</option></select>
+
+        <div class="fg">
+            <label>Student</label>
+            <select id="selectStudent">
+                <option value="">— Select Student —</option>
+                <option th:each="s : ${students}"
+                        th:value="${s.id}"
+                        th:text="${s.firstName + ' ' + s.lastName}">
+                </option>
+            </select>
         </div>
-        <div class="fg"><label>Organization</label>
-            <select><option>— Select Organization —</option><option>JPCS</option><option>ECES</option><option>CATS</option><option>NSAS</option></select>
+
+        <div class="fg">
+            <label>Organization</label>
+            <select id="selectOrganization">
+                <option value="">— Select Organization —</option>
+                <option th:each="org : ${organizations}"
+                        th:value="${org.id}"
+                        th:text="${org.name}">
+                </option>
+            </select>
         </div>
-        <div class="fg"><label>Role</label>
-            <select><option>— Select Role —</option><option>President</option><option>Vice President</option><option>Secretary</option><option>Treasurer</option><option>Auditor</option><option>PRO</option></select>
+
+        <div class="fg">
+            <label>Role</label>
+            <select id="selectRole">
+                <option value="">— Select Role —</option>
+                <option th:each="r : ${roles}"
+                        th:value="${r.id}"
+                        th:text="${r.roleName}">
+                </option>
+            </select>
         </div>
-        <div class="fg"><label>Effective Date</label><input type="date"></div>
+
+        <div class="fg">
+            <label>Effective Date</label>
+            <input type="date" id="effectiveDate">
+        </div>
+
         <div class="modal-footer">
             <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
-            <button class="btn btn-primary" onclick="closeModal()">Assign Role</button>
+            <button class="btn btn-primary" onclick="submitAssignment()">Assign Role</button>
         </div>
     </div>
 </div>
-
 <script>
+    const CSRF_TOKEN  = document.querySelector('meta[name="_csrf"]').content;
+    const CSRF_HEADER = document.querySelector('meta[name="_csrf_header"]').content;
+
     function selectRole(el) {
         document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
         el.classList.add('selected');
     }
     function openModal()  { document.getElementById('addModal').classList.add('open'); }
     function closeModal() { document.getElementById('addModal').classList.remove('open'); }
+
+    async function submitAssignment() {
+        const studentId      = document.getElementById('selectStudent').value;
+        const organizationId = document.getElementById('selectOrganization').value;
+        const roleId         = document.getElementById('selectRoleDropdown').value;
+        const effectiveDate  = document.getElementById('effectiveDate').value;
+
+        if (!studentId || !organizationId || !roleId) {
+            alert('Please fill in Student, Organization, and Role.');
+            return;
+        }
+
+        try {
+            const res = await fetch('/dashboard/roles/assign', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [CSRF_HEADER]: CSRF_TOKEN
+                },
+                body: JSON.stringify({ studentId, organizationId, roleId, effectiveDate })
+            });
+            if (res.ok) {
+                closeModal();
+                location.reload();
+            } else {
+                const data = await res.json();
+                alert(data.error || 'Failed to assign role.');
+            }
+        } catch (err) {
+            alert('Network error. Please try again.');
+        }
+    }
 </script>
+</body>
+</html>
 </body>
 </html>
