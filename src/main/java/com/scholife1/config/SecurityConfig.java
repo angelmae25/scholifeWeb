@@ -1,6 +1,4 @@
 // FILE PATH: src/main/java/com/scholife1/config/SecurityConfig.java
-// Change from original: added /api/students to permitAll() so Flutter can POST
-// without needing a login session.
 
 package com.scholife1.config;
 
@@ -40,12 +38,16 @@ public class SecurityConfig {
         http
                 .authenticationManager(authenticationManager(http))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/auth/login", "/auth/register",
-                                "/css/**", "/js/**", "/images/**"
-                        ).permitAll()
-                        // Allow Flutter mobile app to call these without a session
+                        // ── Static assets ──────────────────────────────────
+                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+
+                        // ── Web auth pages ─────────────────────────────────
+                        .requestMatchers("/auth/login", "/auth/register").permitAll()
+
+                        // ── Flutter mobile API (no session / no CSRF) ──────
                         .requestMatchers("/api/**").permitAll()
+
+                        // ── Everything else requires login ─────────────────
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
@@ -62,7 +64,7 @@ public class SecurityConfig {
                         .logoutSuccessUrl("/auth/login?logout")
                         .permitAll()
                 )
-                // Disable CSRF for all /api/** so Flutter POST requests work
+                // ── Disable CSRF for all /api/** so Flutter POST works ─────
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"));
 
         return http.build();
